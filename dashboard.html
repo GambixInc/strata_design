@@ -382,101 +382,39 @@
     </div>
 
     <script>
-        // Mock data loading
+        const API_BASE = 'http://localhost:8080/api';
+        
+        // Real API calls
         async function fetchReport(site, type) {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    if (type === 'analysis') {
-                        resolve(JSON.parse(`
-                            {
-                                "original_url": "https://www.uvicorn.org/",
-                                "scraped_at": "2025-06-26T22:00:16.796092",
-                                "title": "Uvicorn",
-                                "stats": {
-                                    "links_count": 126,
-                                    "inline_styles_count": 0,
-                                    "internal_stylesheets_count": 3,
-                                    "external_stylesheets_count": 3,
-                                    "inline_scripts_count": 8,
-                                    "external_scripts_count": 1
-                                },
-                                "seo_metadata": {
-                                    "meta_tags": {
-                                        "viewport": "width=device-width,initial-scale=1",
-                                        "description": "The lightning-fast ASGI server.",
-                                        "generator": "mkdocs-1.6.1, mkdocs-material-9.6.13"
-                                    },
-                                    "open_graph": {},
-                                    "twitter_cards": {},
-                                    "structured_data": [],
-                                    "headings": {
-                                        "h1": ["Introduction"],
-                                        "h2": ["Quickstart", "Usage", "The ASGI interface", "Why ASGI?", "Alternative ASGI servers", "ASGI frameworks"],
-                                        "h3": ["Command line options", "Running programmatically", "Running with Gunicorn", "Application factories", "HTTP Scope", "HTTP Messages", "Requests & responses", "Reading the request body", "Streaming responses", "Daphne", "Hypercorn", "Starlette", "Django Channels", "Quart", "FastAPI", "BlackSheep", "Falcon", "Muffin", "Litestar", "Panther"],
-                                        "h4": ["uvicorn.run", "Config and Server instances"],
-                                        "h5": [],
-                                        "h6": []
-                                    },
-                                    "images": [
-                                        {"src": "uvicorn.png", "alt": "logo"},
-                                        {"src": "https://github.com/encode/uvicorn/workflows/Test%20Suite/badge.svg", "alt": "Test Suite"}
-                                    ],
-                                    "internal_links": [],
-                                    "external_links": []
-                                },
-                                "page_speed_indicators": {
-                                    "total_images": 6,
-                                    "images_without_alt": 0,
-                                    "total_scripts": 9,
-                                    "total_stylesheets": 3,
-                                    "inline_styles": 0,
-                                    "total_links": 126
-                                },
-                                "word_count": 2524,
-                                "top_keywords": {
-                                    "uvicorn": 4,
-                                    "server": 3,
-                                    "asgi": 3
-                                }
-                            }
-                        `)); // Content from metadata.json and seo_report.txt combined
-                    } else if (type === 'analytics') {
-                        resolve(JSON.parse(`
-                            {
-                                "detailed_analytics": {
-                                    "google_analytics": [
-                                        {
-                                            "type": "google_analytics",
-                                            "version": "GA4",
-                                            "tracking_id": null,
-                                            "measurement_id": "G-KTS6TXPD85",
-                                            "content_preview": "function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e(\\"js\\",new Date),e(\\"config\\",\\"G-KTS6TXPD85\\"),document.addEventListener(\\"DOMContentLoaded\\",(functio...",
-                                            "src": ""
-                                        }
-                                    ],
-                                    "facebook_pixel": [],
-                                    "google_tag_manager": [],
-                                    "hotjar": [],
-                                    "mixpanel": [],
-                                    "other_tracking": [],
-                                    "social_media_tracking": [],
-                                    "ecommerce_tracking": []
-                                }
-                            }
-                        `)); // Content from metadata.json
-                    } else {
-                        resolve(null);
-                    }
-                }, 500);
-            });
+            try {
+                const response = await fetch(`${API_BASE}/report/${encodeURIComponent(site)}/${type}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data;
+                } else {
+                    console.error(`Failed to fetch ${type} report for ${site}:`, response.statusText);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`Error fetching ${type} report for ${site}:`, error);
+                return null;
+            }
         }
 
         async function fetchSites() {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(['https://www.uvicorn.org/']);
-                }, 200);
-            });
+            try {
+                const response = await fetch(`${API_BASE}/sites`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.success ? data.sites : [];
+                } else {
+                    console.error('Failed to fetch sites:', response.statusText);
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error fetching sites:', error);
+                return [];
+            }
         }
 
         function showError(elementId, message) {
