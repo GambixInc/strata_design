@@ -85,6 +85,60 @@
         .logout-btn:hover {
             background: #c82333;
         }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .no-sites-message {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
 
         .site-selector {
             background: rgba(255, 255, 255, 0.95);
@@ -340,14 +394,50 @@
             </div>
         </div>
 
+        <div class="nav-bar">
+            <div class="nav-links">
+                <a href="http://localhost:8080/scraper" class="nav-link">
+                    <i class="fas fa-spider"></i> Web Scraper
+                </a>
+                <a href="http://localhost:8080/" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+            <div style="font-weight: 600; color: #4a4a8a;">
+                <i class="fas fa-tools"></i> Strata Tools
+            </div>
+        </div>
+
         <div class="site-selector">
             <label for="siteSelect"><strong>Select Scraped Site:</strong></label>
             <select id="siteSelect">
-                <option value="">Loading sites...</option>
+                <option value="">Choose a site to analyze...</option>
             </select>
         </div>
 
-        <div class="dashboard-grid">
+        <div id="noSitesMessage" class="no-sites-message" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-title">No Sites Available</div>
+                </div>
+                <div style="text-align: center; padding: 40px;">
+                    <p style="font-size: 1.1rem; color: #666; margin-bottom: 20px;">
+                        No scraped sites found for your account.
+                    </p>
+                    <p style="color: #888; margin-bottom: 30px;">
+                        To see analytics and SEO insights, you need to scrape some websites first.
+                    </p>
+                    <a href="http://localhost:8080/scraper" class="cta-button" style="display: inline-block; text-decoration: none;">
+                        <i class="fas fa-spider"></i> Start Scraping Websites
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboardGrid" class="dashboard-grid" style="display: none;">
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
@@ -434,7 +524,7 @@
         function checkAuth() {
             const currentUser = localStorage.getItem('currentUser');
             if (!currentUser) {
-                window.location.href = 'login.html';
+                window.location.href = 'http://localhost:8080/login.html';
                 return null;
             }
             return JSON.parse(currentUser);
@@ -458,7 +548,7 @@
         // Logout function
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            window.location.href = 'http://localhost:8080/login.html';
         }
         
         // Real API calls
@@ -491,6 +581,68 @@
             } catch (error) {
                 console.error('Error fetching sites:', error);
                 return [];
+            }
+        }
+        
+        // Initialize the dashboard
+        async function initializeDashboard() {
+            const sites = await fetchSites();
+            const siteSelect = document.getElementById('siteSelect');
+            const noSitesMessage = document.getElementById('noSitesMessage');
+            const dashboardGrid = document.getElementById('dashboardGrid');
+            
+            // Clear existing options except the first one
+            siteSelect.innerHTML = '<option value="">Choose a site to analyze...</option>';
+            
+            if (sites.length === 0) {
+                // No sites available
+                noSitesMessage.style.display = 'block';
+                dashboardGrid.style.display = 'none';
+                siteSelect.style.display = 'none';
+                document.querySelector('.site-selector').style.display = 'none';
+            } else {
+                // Sites available
+                noSitesMessage.style.display = 'none';
+                siteSelect.style.display = 'block';
+                document.querySelector('.site-selector').style.display = 'block';
+                
+                // Add site options
+                sites.forEach(site => {
+                    const option = document.createElement('option');
+                    option.value = site;
+                    option.textContent = site;
+                    siteSelect.appendChild(option);
+                });
+                
+                // Add event listener for site selection
+                siteSelect.addEventListener('change', function() {
+                    const selectedSite = this.value;
+                    if (selectedSite) {
+                        dashboardGrid.style.display = 'grid';
+                        loadReports(selectedSite);
+                    } else {
+                        dashboardGrid.style.display = 'none';
+                        // Reset all dashboard sections to loading state
+                        resetDashboardSections();
+                    }
+                });
+            }
+        }
+        
+        // Reset dashboard sections to loading state
+        function resetDashboardSections() {
+            const sections = ['seoOverview', 'performanceMetrics', 'contentAnalysis', 'analyticsTracking', 'recommendations'];
+            sections.forEach(sectionId => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading data...</p></div>';
+                }
+            });
+            
+            // Clear chart
+            if (window.seoChartInstance) {
+                window.seoChartInstance.destroy();
+                window.seoChartInstance = null;
             }
         }
 
@@ -748,43 +900,30 @@
                     fetchReport(site, 'analytics')
                 ]);
 
-                // Render all sections
-                renderSEOOverview(analysis);
-                renderPerformanceMetrics(analysis);
-                renderContentAnalysis(analysis);
-                renderAnalyticsTracking(analytics);
-                renderSEOScoreChart(analysis);
-                renderRecommendations(analysis);
-
+                if (analysis) {
+                    // Render all sections
+                    renderSEOOverview(analysis);
+                    renderPerformanceMetrics(analysis);
+                    renderContentAnalysis(analysis);
+                    renderSEOScoreChart(analysis);
+                    renderRecommendations(analysis);
+                } else {
+                    showError('seoOverview', 'No analysis data available for this site.');
+                }
+                
+                if (analytics) {
+                    renderAnalyticsTracking(analytics);
+                } else {
+                    showError('analyticsTracking', 'No analytics data available for this site.');
+                }
             } catch (error) {
                 console.error('Error loading reports:', error);
-                showError('seoOverview', 'Error loading reports');
-            }
-        }
-
-        async function main() {
-            const siteSelect = document.getElementById('siteSelect');
-            const sites = await fetchSites();
-            
-            if (sites.length === 0) {
-                siteSelect.innerHTML = '<option value="">No sites found</option>';
-                return;
-            }
-
-            siteSelect.innerHTML = sites.map(site => 
-                `<option value="${site}">${site}</option>`
-            ).join('');
-
-            siteSelect.addEventListener('change', e => loadReports(e.target.value));
-            
-            // Load first site by default
-            if (sites.length > 0) {
-                loadReports(sites[0]);
+                showError('seoOverview', 'Failed to load reports. Please try again.');
             }
         }
 
         // Initialize dashboard
-        main();
+        initializeDashboard();
     </script>
 </body>
 </html>

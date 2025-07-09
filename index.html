@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strata - AI-Powered Website Optimization</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -268,8 +269,8 @@
             }
         }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header class="header">
         <a href="#" class="logo">STRATA</a>
         <div class="nav-container">
@@ -285,7 +286,7 @@
                 <path d="m21 21-4.35-4.35"></path>
             </svg>
         </div>
-        <a href="login.html" class="login-btn">Login</a>
+        <a href="/login.html" class="login-btn">Login</a>
     </header>
 
     <main class="main-content">
@@ -295,10 +296,16 @@
         <p class="hero-subtitle">
             AI-powered platform that helps businesses optimize their websites' SEO, A/B testing, and UI/UX for maximum performance and conversion rates.
         </p>
-        <a href="login.html" class="cta-button">
-            Get Started
-            <span class="arrow">→</span>
-        </a>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="/login.html" class="cta-button">
+                Get Started
+                <span class="arrow">→</span>
+            </a>
+            <a href="http://localhost:8080/scraper" class="cta-button" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                <i class="fas fa-spider"></i> Try Scraper
+                <span class="arrow">→</span>
+            </a>
+        </div>
     </main>
 
     <section class="features-section" id="features">
@@ -412,5 +419,5 @@
             }, 600);
         });
     </script>
-</body>
+  </body>
 </html>
