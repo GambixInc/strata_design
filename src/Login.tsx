@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
@@ -7,39 +7,42 @@ const mockUsers: Record<string, any> = {
     name: 'John Smith',
     role: 'CEO, TechStartup Inc.',
     password: 'demo123',
-    sites: [
-      'techstartup.com',
-      'product-demo.com',
-      'landing-page.com',
-      'blog.techstartup.com',
-      'support.techstartup.com',
-    ],
   },
   'sarah@ecommerce.com': {
     name: 'Sarah Johnson',
     role: 'Marketing Director, E-Commerce Pro',
     password: 'demo123',
-    sites: [
-      'ecommerce-pro.com',
-      'shop.ecommerce-pro.com',
-      'blog.ecommerce-pro.com',
-      'help.ecommerce-pro.com',
-      'about.ecommerce-pro.com',
-      'contact.ecommerce-pro.com',
-      'products.ecommerce-pro.com',
-      'categories.ecommerce-pro.com',
-      'deals.ecommerce-pro.com',
-      'reviews.ecommerce-pro.com',
-      'faq.ecommerce-pro.com',
-      'shipping.ecommerce-pro.com',
-    ],
   },
   'mike@agency.com': {
     name: 'Mike Chen',
     role: 'Digital Agency Owner',
     password: 'demo123',
-    sites: Array.from({ length: 25 }, (_, i) => `client${i + 1}.com`),
   },
+};
+
+const userSiteMap: Record<string, string[]> = {
+  'john@techstartup.com': [
+    'techstartup.com',
+    'product-demo.com',
+    'landing-page.com',
+    'blog.techstartup.com',
+    'support.techstartup.com',
+  ],
+  'sarah@ecommerce.com': [
+    'ecommerce-pro.com',
+    'shop.ecommerce-pro.com',
+    'blog.ecommerce-pro.com',
+    'help.ecommerce-pro.com',
+    'about.ecommerce-pro.com',
+    'contact.ecommerce-pro.com',
+    'products.ecommerce-pro.com',
+    'categories.ecommerce-pro.com',
+    'deals.ecommerce-pro.com',
+    'reviews.ecommerce-pro.com',
+    'faq.ecommerce-pro.com',
+    'shipping.ecommerce-pro.com',
+  ],
+  'mike@agency.com': Array.from({ length: 25 }, (_, i) => `client${i + 1}.com`),
 };
 
 const Login: React.FC = () => {
@@ -47,7 +50,37 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [siteCounts, setSiteCounts] = useState<Record<string, number>>({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch the real list of scraped sites from the backend
+    fetch('/api/sites')
+      .then(res => res.json())
+      .then(data => {
+        const allSites: string[] = data.sites || [];
+        // Assign sites to users based on the original mapping
+        const counts: Record<string, number> = {};
+        Object.keys(userSiteMap).forEach(userEmail => {
+          // Count how many of the user's mapped sites are in the backend list
+          counts[userEmail] = userSiteMap[userEmail].filter(site => allSites.includes(site)).length;
+        });
+        // For Mike, if there are more sites than mapped, assign the rest to him
+        const mikeSites = userSiteMap['mike@agency.com'];
+        const assignedSites = Object.values(userSiteMap).flat();
+        const unassigned = allSites.filter(site => !assignedSites.includes(site));
+        counts['mike@agency.com'] += unassigned.length;
+        setSiteCounts(counts);
+      })
+      .catch(() => {
+        // fallback: use the original mapping
+        setSiteCounts({
+          'john@techstartup.com': userSiteMap['john@techstartup.com'].length,
+          'sarah@ecommerce.com': userSiteMap['sarah@ecommerce.com'].length,
+          'mike@agency.com': userSiteMap['mike@agency.com'].length,
+        });
+      });
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +93,7 @@ const Login: React.FC = () => {
           email,
           name: mockUsers[email].name,
           role: mockUsers[email].role,
-          sites: mockUsers[email].sites,
+          sites: userSiteMap[email],
         })
       );
       setSuccess('Login successful! Redirecting...');
@@ -124,7 +157,7 @@ const Login: React.FC = () => {
           <div className="user-card" key={userEmail} onClick={() => quickLogin(userEmail)}>
             <div className="user-name">{user.name}</div>
             <div className="user-role">{user.role}</div>
-            <div className="user-sites">{user.sites.length} websites scraped</div>
+            <div className="user-sites">{siteCounts[userEmail] ?? 0} websites scraped</div>
             <button className="quick-login-btn" type="button" onClick={e => { e.stopPropagation(); quickLogin(userEmail); }}>
               Quick Login
             </button>
