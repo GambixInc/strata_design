@@ -46,7 +46,7 @@
             color: #666;
             font-size: 1.1rem;
         }
-        
+
         .user-info {
             position: absolute;
             top: 20px;
@@ -600,7 +600,7 @@
                 dashboardGrid.style.display = 'none';
                 siteSelect.style.display = 'none';
                 document.querySelector('.site-selector').style.display = 'none';
-            } else {
+                    } else {
                 // Sites available
                 noSitesMessage.style.display = 'none';
                 siteSelect.style.display = 'block';
@@ -901,16 +901,16 @@
                 ]);
 
                 if (analysis) {
-                    // Render all sections
-                    renderSEOOverview(analysis);
-                    renderPerformanceMetrics(analysis);
-                    renderContentAnalysis(analysis);
-                    renderSEOScoreChart(analysis);
-                    renderRecommendations(analysis);
+                // Render all sections
+                renderSEOOverview(analysis);
+                renderPerformanceMetrics(analysis);
+                renderContentAnalysis(analysis);
+                renderSEOScoreChart(analysis);
+                renderRecommendations(analysis);
                 } else {
                     showError('seoOverview', 'No analysis data available for this site.');
                 }
-                
+
                 if (analytics) {
                     renderAnalyticsTracking(analytics);
                 } else {

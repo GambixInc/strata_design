@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import Scraper from './Scraper';
 import './App.css';
 
 function App() {
@@ -12,8 +13,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* Optionally, add a route for the scraper UI */}
-        <Route path="/scraper" element={<iframe title="Scraper" src="/scraper_frontend.html" style={{width: '100vw', height: '100vh', border: 'none'}} />} />
+        <Route path="/scraper" element={<Scraper />} />
       </Routes>
     </Router>
   );
