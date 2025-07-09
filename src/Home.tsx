@@ -5,7 +5,7 @@ import './Home.css';
 const Home: React.FC = () => (
   <>
     <header className="header">
-      <a href="#" className="logo">STRATA</a>
+      <a href="#" className="logo">STdddA</a>
       <div className="nav-container">
         <nav className="nav-menu">
           <Link to="/" className="active">HOME</Link>
