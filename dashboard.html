@@ -46,6 +46,45 @@
             color: #666;
             font-size: 1.1rem;
         }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #4a4a8a;
+            font-size: 1.1rem;
+        }
+        
+        .user-role {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+        }
 
         .site-selector {
             background: rgba(255, 255, 255, 0.95);
@@ -292,6 +331,13 @@
         <div class="header">
             <h1><i class="fas fa-chart-line"></i> SEO & Analytics Dashboard</h1>
             <p>Comprehensive analysis and insights for your scraped websites</p>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-role" id="userRole"></div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
         </div>
 
         <div class="site-selector">
@@ -383,6 +429,37 @@
 
     <script>
         const API_BASE = 'http://localhost:8080/api';
+        
+        // Check if user is logged in
+        function checkAuth() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return JSON.parse(currentUser);
+        }
+        
+        // Get current user
+        const currentUser = checkAuth();
+        
+        // Update header with user info
+        if (currentUser) {
+            const header = document.querySelector('.header h1');
+            if (header) {
+                header.innerHTML = `<i class="fas fa-chart-line"></i> Welcome, ${currentUser.name}`;
+            }
+            
+            // Update user info display
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role;
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
         
         // Real API calls
         async function fetchReport(site, type) {

@@ -3,13 +3,7 @@ import './App.css';
 
 const API_BASE = '/api';
 
-const userProfiles = [
-  { value: 'general', label: 'General User' },
-  { value: 'foodie_event_planner', label: 'Foodie Event Planner' },
-  { value: 'tech_enthusiast', label: 'Tech Enthusiast' },
-  { value: 'business_owner', label: 'Business Owner' },
-  { value: 'student', label: 'Student' },
-];
+// User profiles removed - now using login system
 
 type ScrapeResult = any; // You can define a more specific type if desired
 
@@ -35,7 +29,7 @@ function App() {
 
   // Scrape/Optimize State
   const [url, setUrl] = useState('');
-  const [userProfile, setUserProfile] = useState(userProfiles[0].value);
+  const [userProfile, setUserProfile] = useState('general');
   const [scrapeResult, setScrapeResult] = useState<ScrapeResult | null>(null);
 
   // Files State
@@ -217,9 +211,10 @@ function App() {
             required
           />
           <select value={userProfile} onChange={e => setUserProfile(e.target.value)}>
-            {userProfiles.map(profile => (
-              <option key={profile.value} value={profile.value}>{profile.label}</option>
-            ))}
+            <option value="general">General User</option>
+            <option value="business">Business Owner</option>
+            <option value="marketing">Marketing Professional</option>
+            <option value="developer">Developer</option>
           </select>
           <button className="btn" onClick={scrapeWebsite} disabled={loading}>🔍 Scrape Website</button>
           <button className="btn btn-success" onClick={optimizeWebsite} disabled={loading}>🚀 Optimize</button>
