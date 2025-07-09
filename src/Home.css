@@ -1,0 +1,208 @@
+/* Home page styles extracted from index.html */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+.nav-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-menu {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 30px;
+  padding: 12px 24px;
+  gap: 32px;
+}
+.nav-menu a, .nav-menu .active {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+.nav-menu a:hover, .nav-menu .active {
+  color: #7c3aed;
+}
+.search-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.search-icon:hover {
+  opacity: 1;
+}
+.login-btn {
+  background: transparent;
+  border: 2px solid #7c3aed;
+  color: #7c3aed;
+  padding: 12px 24px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.login-btn:hover {
+  background: #7c3aed;
+  color: white;
+}
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 40px 60px;
+  min-height: calc(100vh - 200px);
+}
+.hero-title {
+  font-size: clamp(4rem, 8vw, 8rem);
+  font-weight: 300;
+  margin-bottom: 30px;
+  line-height: 0.9;
+}
+.gradient-text {
+  background: linear-gradient(135deg, #9333ea, #3b82f6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 400;
+}
+.black-text {
+  color: #1a1a1a;
+  font-weight: 300;
+}
+.hero-subtitle {
+  font-size: 18px;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.cta-button {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+.cta-button:hover .arrow {
+  transform: translateX(3px);
+}
+.features-section {
+  display: flex;
+  gap: 20px;
+  padding: 0 40px 40px;
+  overflow-x: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.feature-card {
+  min-width: 250px;
+  height: 180px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+.feature-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+.feature-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+@media (max-width: 768px) {
+  .header {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .nav-menu {
+    gap: 20px;
+    padding: 10px 20px;
+  }
+  .nav-menu a {
+    font-size: 13px;
+  }
+  .main-content {
+    padding: 60px 20px 40px;
+  }
+  .hero-title {
+    font-size: clamp(3rem, 10vw, 6rem);
+  }
+  .hero-subtitle {
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+  .features-section {
+    padding: 0 20px 20px;
+  }
+  .feature-card {
+    min-width: 200px;
+    height: 150px;
+  }
+}
+@media (max-width: 480px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .login-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+} 
