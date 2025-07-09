@@ -5,7 +5,7 @@ import './Home.css';
 const Home: React.FC = () => (
   <>
     <header className="header">
-      <a href="#" className="logo">STdddA</a>
+      <a href="#" className="logo">STRATA</a>
       <div className="nav-container">
         <nav className="nav-menu">
           <Link to="/" className="active">HOME</Link>
@@ -34,10 +34,10 @@ const Home: React.FC = () => (
           Get Started
           <span className="arrow">→</span>
         </Link>
-        <a href="/scraper_frontend.html" className="cta-button" style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }}>
+        <Link to="/scraper" className="cta-button" style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }}>
           <i className="fas fa-spider"></i> Try Scraper
           <span className="arrow">→</span>
-        </a>
+        </Link>
       </div>
     </main>
 
