@@ -396,10 +396,10 @@
 
         <div class="nav-bar">
             <div class="nav-links">
-                <a href="http://localhost:8080/scraper" class="nav-link">
+                <a href="/scraper" class="nav-link">
                     <i class="fas fa-spider"></i> Web Scraper
                 </a>
-                <a href="http://localhost:8080/" class="nav-link">
+                <a href="/" class="nav-link">
                     <i class="fas fa-home"></i> Home
                 </a>
             </div>
@@ -430,7 +430,7 @@
                     <p style="color: #888; margin-bottom: 30px;">
                         To see analytics and SEO insights, you need to scrape some websites first.
                     </p>
-                    <a href="http://localhost:8080/scraper" class="cta-button" style="display: inline-block; text-decoration: none;">
+                    <a href="/scraper" class="cta-button" style="display: inline-block; text-decoration: none;">
                         <i class="fas fa-spider"></i> Start Scraping Websites
                     </a>
                 </div>
@@ -524,7 +524,7 @@
         function checkAuth() {
             const currentUser = localStorage.getItem('currentUser');
             if (!currentUser) {
-                window.location.href = 'http://localhost:8080/login.html';
+                window.location.href = '/login.html';
                 return null;
             }
             return JSON.parse(currentUser);
@@ -548,7 +548,7 @@
         // Logout function
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'http://localhost:8080/login.html';
+            window.location.href = '/login.html';
         }
         
         // Real API calls

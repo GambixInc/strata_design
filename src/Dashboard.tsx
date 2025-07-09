@@ -25,13 +25,13 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     setLoadingSites(true);
-    fetch('http://localhost:8080/api/sites')
+    fetch('/api/sites')
       .then(res => res.json())
       .then(data => {
         setSites(data.sites || []);
         setLoadingSites(false);
       })
-      .catch(() => {
+      .catch((e) => {
         setError('Failed to load sites');
         setLoadingSites(false);
       });
@@ -42,15 +42,15 @@ const Dashboard: React.FC = () => {
     setLoadingData(true);
     setError(null);
     Promise.all([
-      fetch(`http://localhost:8080/api/report/${encodeURIComponent(selectedSite)}/analysis`).then(res => res.json()),
-      fetch(`http://localhost:8080/api/report/${encodeURIComponent(selectedSite)}/analytics`).then(res => res.json()),
+      fetch(`/api/report/${encodeURIComponent(selectedSite)}/analysis`).then(res => res.json()),
+      fetch(`/api/report/${encodeURIComponent(selectedSite)}/analytics`).then(res => res.json()),
     ])
       .then(([analysisData, analyticsData]) => {
         setAnalysis(analysisData);
         setAnalytics(analyticsData);
         setLoadingData(false);
       })
-      .catch(() => {
+      .catch((e) => {
         setError('Failed to load report data');
         setLoadingData(false);
       });
