@@ -1,11 +1,62 @@
-# React + TypeScript + Vite
+# Strata - AI-Powered Website Optimization Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains two main components:
 
-Currently, two official plugins are available:
+1.  **`strata_design`**: The React frontend application built with Vite and TypeScript.
+2.  **`strata_scraper`**: The Python Flask backend that handles web scraping and data storage.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Project Overview
+
+Strata is an AI-powered platform designed to help businesses optimize their websites. It provides functionalities for:
+
+*   **User Authentication**: Secure login and dashboard access.
+*   **Website Scraping**: A tool to scrape website content.
+*   **SEO & Analytics Dashboard**: Displays scraped data, including SEO metrics, performance indicators, and analytics.
+
+## Prerequisites
+
+Before running the application, ensure you have the following installed:
+
+*   **Node.js** (LTS version recommended) and **npm** (comes with Node.js)
+*   **Python 3.8+** and **pip**
+
+## Setup and Running the Application
+
+To get the Strata application up and running, you need to start both the frontend and the backend services.
+
+### 1. Backend Setup (`strata_scraper`)
+
+Navigate to the `strata_scraper` directory and set up the Python backend:
+
+```bash
+cd strata_scraper
+pip install -r requirements.txt
+python server.py
+```
+
+This will start the Flask development server, which provides the API endpoints for the frontend.
+
+### 2. Frontend Setup (`strata_design`)
+
+Open a new terminal window, navigate to the `strata_design` directory, and set up the React frontend:
+
+```bash
+cd strata_design
+npm install
+npm run dev
+```
+
+This will start the Vite development server. The application will typically be accessible at `http://localhost:5173` (or another port if 5173 is in use).
+
+## Usage
+
+Once both the frontend and backend servers are running:
+
+1.  Open your web browser and go to the frontend URL (e.g., `http://localhost:5173`).
+2.  You will be presented with the login page. You can use the following demo credentials:
+    *   **Email**: `john@techstartup.com` / `sarah@ecommerce.com` / `mike@agency.com`
+    *   **Password**: `demo123`
+3.  After logging in, you will be redirected to the dashboard. You can also navigate to the scraper tool from the dashboard.
 
 ## Expanding the ESLint configuration
 
