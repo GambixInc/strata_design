@@ -1,9 +1,12 @@
+// Home.tsx - Main landing page for Strata
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
+// The Home component displays the landing page, navigation, hero, and features
 const Home: React.FC = () => (
   <>
+    {/* Header with logo and navigation */}
     <header className="header">
       <a href="#" className="logo">STRATA</a>
       <div className="nav-container">
@@ -14,14 +17,17 @@ const Home: React.FC = () => (
           <a href="#pricing">PRICING</a>
           <a href="#contact">CONTACT</a>
         </nav>
+        {/* Search icon (decorative) */}
         <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.35-4.35"></path>
         </svg>
       </div>
+      {/* Login button */}
       <Link to="/login" className="login-btn">Login</Link>
     </header>
 
+    {/* Hero section */}
     <main className="main-content">
       <h1 className="hero-title">
         <span className="gradient-text">Strata</span> <span className="black-text">optimizes websites</span>
@@ -30,6 +36,7 @@ const Home: React.FC = () => (
         AI-powered platform that helps businesses optimize their websites' SEO, A/B testing, and UI/UX for maximum performance and conversion rates.
       </p>
       <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {/* Call-to-action buttons */}
         <Link to="/login" className="cta-button">
           Get Started
           <span className="arrow">→</span>
@@ -41,6 +48,7 @@ const Home: React.FC = () => (
       </div>
     </main>
 
+    {/* Features section */}
     <section className="features-section" id="features">
       <div className="feature-card">
         <div className="feature-icon">🔍</div>

@@ -1,7 +1,9 @@
+// Login.tsx - Login page with mock user authentication
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
+// Mock user data for demo sign-in
 const mockUsers: Record<string, any> = {
   'john@techstartup.com': {
     name: 'John Smith',
@@ -21,6 +23,7 @@ const mockUsers: Record<string, any> = {
 };
 
 const Login: React.FC = () => {
+  // State for form fields and login status
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -28,10 +31,12 @@ const Login: React.FC = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
+  // Handle form submission and mock authentication
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    // Check credentials against mock user data
     if (mockUsers[email] && mockUsers[email].password === password) {
       localStorage.setItem(
         'currentUser',
@@ -53,13 +58,16 @@ const Login: React.FC = () => {
   return (
     <div className="login-bg-grid">
       <div className="login-center-card">
+        {/* Logo and headings */}
         <div className="login-logo">
           <img src="/vite.svg" alt="Logo" />
         </div>
         <h2 className="login-title">Log in to your account</h2>
         <p className="login-subtitle">Welcome back! Please enter your details.</p>
+        {/* Error and success messages */}
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
+        {/* Login form */}
         <form className="login-form-modern" onSubmit={handleSubmit}>
           <div className="form-group-modern">
             <label htmlFor="email">Email</label>
@@ -85,6 +93,7 @@ const Login: React.FC = () => {
               required
             />
           </div>
+          {/* Remember me and forgot password row */}
           <div className="login-row-between">
             <label className="remember-checkbox">
               <input
@@ -96,11 +105,13 @@ const Login: React.FC = () => {
             </label>
             <Link to="#" className="forgot-password-link">Forgot password</Link>
           </div>
+          {/* Sign in and Google sign in buttons */}
           <button type="submit" className="login-btn-modern">Sign in</button>
           <button type="button" className="google-btn-modern">
             <span className="google-icon">G</span> Sign in with Google
           </button>
         </form>
+        {/* Sign up link */}
         <div className="signup-link">
           Don’t have an account? <Link to="#" className="signup-link-highlight">Sign up</Link>
         </div>

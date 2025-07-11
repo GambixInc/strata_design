@@ -1,11 +1,14 @@
+// Dashboard.tsx - Dashboard layout with sidebar navigation and user info
 import React from 'react';
-import './Dashboard.css';
+// import './Dashboard.css';
 
+// Sidebar component with navigation links and user info
 const Sidebar = () => (
   <aside className="sidebar">
     <div className="sidebar-header">
       <span className="sidebar-logo">Strata</span>
     </div>
+    {/* Navigation links */}
     <nav className="sidebar-nav">
       <a href="#" className="sidebar-link active">
         <span className="sidebar-icon">{/* Home icon */}
@@ -32,6 +35,7 @@ const Sidebar = () => (
         Account
       </a>
     </nav>
+    {/* Support, settings, and user info at the bottom */}
     <div className="sidebar-bottom">
       <a href="#" className="sidebar-link">
         <span className="sidebar-icon">
@@ -45,6 +49,7 @@ const Sidebar = () => (
         </span>
         Settings
       </a>
+      {/* User profile section */}
       <div className="sidebar-user">
         <img className="sidebar-avatar" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Olivia Rhye" />
         <div className="sidebar-user-info">
@@ -59,6 +64,7 @@ const Sidebar = () => (
   </aside>
 );
 
+// Main dashboard layout with sidebar and content area
 const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-layout">
