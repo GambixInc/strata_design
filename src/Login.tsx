@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
@@ -20,39 +20,13 @@ const mockUsers: Record<string, any> = {
   },
 };
 
-const demoUserEmails = Object.keys(mockUsers);
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [siteCounts, setSiteCounts] = useState<Record<string, number>>({});
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch the real number of sites scraped by each user
-    const fetchCounts = async () => {
-      const counts: Record<string, number> = {};
-      await Promise.all(
-        demoUserEmails.map(async (userEmail) => {
-          try {
-            const res = await fetch(`/api/user-sites?email=${encodeURIComponent(userEmail)}`);
-            const data = await res.json();
-            if (data.success && Array.isArray(data.sites)) {
-              counts[userEmail] = data.sites.length;
-            } else {
-              counts[userEmail] = 0;
-            }
-          } catch {
-            counts[userEmail] = 0;
-          }
-        })
-      );
-      setSiteCounts(counts);
-    };
-    fetchCounts();
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,67 +50,60 @@ const Login: React.FC = () => {
     }
   };
 
-  const quickLogin = (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword(mockUsers[userEmail].password);
-    setTimeout(() => {
-      document.getElementById('loginForm')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    }, 0);
-  };
-
   return (
-    <div className="login-container">
-      <div className="login-header">
-        <h1>Welcome to Strata</h1>
-        <p>AI-Powered Website Optimization Platform</p>
-      </div>
-      <div className="login-form">
+    <div className="login-bg-grid">
+      <div className="login-center-card">
+        <div className="login-logo">
+          <img src="/vite.svg" alt="Logo" />
+        </div>
+        <h2 className="login-title">Log in to your account</h2>
+        <p className="login-subtitle">Welcome back! Please enter your details.</p>
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-        <form id="loginForm" onSubmit={handleSubmit}>
-          <div className="form-group">
+        <form className="login-form-modern" onSubmit={handleSubmit}>
+          <div className="form-group-modern">
             <label htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
               name="email"
+              placeholder="Enter your email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="form-group">
+          <div className="form-group-modern">
             <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
               name="password"
+              placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="login-btn">Login</button>
+          <div className="login-row-between">
+            <label className="remember-checkbox">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={e => setRemember(e.target.checked)}
+              />
+              <span>Remember for 30 days</span>
+            </label>
+            <Link to="#" className="forgot-password-link">Forgot password</Link>
+          </div>
+          <button type="submit" className="login-btn-modern">Sign in</button>
+          <button type="button" className="google-btn-modern">
+            <span className="google-icon">G</span> Sign in with Google
+          </button>
         </form>
-        <div className="back-link">
-          <Link to="/">← Back to Home</Link>
+        <div className="signup-link">
+          Don’t have an account? <Link to="#" className="signup-link-highlight">Sign up</Link>
         </div>
-      </div>
-      <div className="mock-users">
-        <h3>Quick Login (Demo Users)</h3>
-        {demoUserEmails.map((userEmail) => {
-          const user = mockUsers[userEmail];
-          return (
-            <div className="user-card" key={userEmail} onClick={() => quickLogin(userEmail)}>
-              <div className="user-name">{user.name}</div>
-              <div className="user-role">{user.role}</div>
-              <div className="user-sites">{siteCounts[userEmail] ?? 0} websites scraped</div>
-              <button className="quick-login-btn" type="button" onClick={e => { e.stopPropagation(); quickLogin(userEmail); }}>
-                Quick Login
-              </button>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
