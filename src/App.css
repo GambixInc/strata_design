@@ -317,6 +317,130 @@ body {
     border: 1px solid #bee5eb;
 }
 
+/* Dashboard Sidebar Layout */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f7f9;
+}
+.sidebar {
+  width: 290px;
+  background: #fff;
+  border-right: 1.5px solid #ececf0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+.sidebar-header {
+  padding: 32px 32px 18px 32px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: -1px;
+}
+.sidebar-logo {
+  color: #a78bfa;
+  font-size: 2rem;
+  font-weight: 700;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 0 0 0;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 32px;
+  color: #475569;
+  font-size: 1.18rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.sidebar-link.active, .sidebar-link:hover {
+  background: #f4f4f7;
+  color: #7c3aed;
+  border-left: 3px solid #a78bfa;
+}
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+}
+.sidebar-bottom {
+  margin-top: auto;
+  padding-bottom: 18px;
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 32px 0 32px;
+  border-top: 1.5px solid #ececf0;
+  margin-top: 24px;
+}
+.sidebar-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ececf0;
+}
+.sidebar-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-user-name {
+  font-weight: 600;
+  color: #22223b;
+  font-size: 1.08rem;
+}
+.sidebar-user-email {
+  color: #64748b;
+  font-size: 0.98rem;
+}
+.sidebar-user-action {
+  display: flex;
+  align-items: center;
+  color: #64748b;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.dashboard-main {
+  flex: 1;
+  padding: 0 0 0 0;
+  min-height: 100vh;
+  background: #f7f7f9;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100vw;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1.5px solid #ececf0;
+    flex-direction: row;
+    align-items: flex-start;
+    height: auto;
+    min-height: 0;
+  }
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  .dashboard-main {
+    padding: 0;
+  }
+}
+
 @media (max-width: 768px) {
     .input-group {
         flex-direction: column;
