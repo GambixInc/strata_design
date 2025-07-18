@@ -35,16 +35,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               <i className="fas fa-home"></i> Home
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/project" className={location.pathname === '/project' ? 'active' : ''}>
               <i className="fas fa-folder"></i> Project
             </Link>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <Link to="/team" className={location.pathname === '/team' ? 'active' : ''}>
               <i className="fas fa-users"></i> Team
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/account" className={location.pathname === '/account' ? 'active' : ''}>
               <i className="fas fa-user-circle"></i> Account
@@ -52,16 +52,16 @@ const Sidebar: React.FC<SidebarProps> = ({
           </li>
         </ul>
         <ul className="sidebar-bottom-nav">
-          <li>
+          {/* <li>
             <Link to="/support" className={location.pathname === '/support' ? 'active' : ''}>
               <i className="fas fa-life-ring"></i> Support
             </Link>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <Link to="/settings" className={location.pathname === '/settings' ? 'active' : ''}>
               <i className="fas fa-cog"></i> Settings
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
       <div className="sidebar-profile">

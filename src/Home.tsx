@@ -76,9 +76,9 @@ const Home: React.FC = () => {
 
           <div className="home-actions">
             <div className="create-project-card">
-              <div className="project-card-icon">
+              {/* <div className="project-card-icon">
                 <i className="fas fa-plus"></i>
-              </div>
+              </div> */}
               <h3>Create New Project</h3>
               <p>Start by entering your website URL to analyze and optimize your site's performance.</p>
               <button 
