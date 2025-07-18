@@ -1,82 +1,154 @@
-// Home.tsx - Main landing page for Strata
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import CreateProjectModal from './components/CreateProjectModal';
+import './App.css';
 import './Home.css';
 
-// The Home component displays the landing page, navigation, hero, and features
-const Home: React.FC = () => (
-  <>
-    {/* Header with logo and navigation */}
-    <header className="header">
-      <a href="#" className="logo">STRATA</a>
-      <div className="nav-container">
-        <nav className="nav-menu">
-          <Link to="/" className="active">HOME</Link>
-          <a href="#features">FEATURES</a>
-          <a href="#about">ABOUT</a>
-          <a href="#pricing">PRICING</a>
-          <a href="#contact">CONTACT</a>
-        </nav>
-        {/* Search icon (decorative) */}
-        <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.35-4.35"></path>
-        </svg>
-      </div>
-      {/* Login button */}
-      <Link to="/login" className="login-btn">Login</Link>
-    </header>
+interface ProjectData {
+  websiteUrl: string;
+  category: string;
+  description: string;
+}
 
-    {/* Hero section */}
-    <main className="main-content">
-      <h1 className="hero-title">
-        <span className="gradient-text">Strata</span> <span className="black-text">optimizes websites</span>
-      </h1>
-      <p className="hero-subtitle">
-        AI-powered platform that helps businesses optimize their websites' SEO, A/B testing, and UI/UX for maximum performance and conversion rates.
-      </p>
-      <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {/* Call-to-action buttons */}
-        <Link to="/login" className="cta-button">
-          Get Started
-          <span className="arrow">→</span>
-        </Link>
-        <Link to="/scraper" className="cta-button" style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }}>
-          <i className="fas fa-spider"></i> Try Scraper
-          <span className="arrow">→</span>
-        </Link>
-      </div>
-    </main>
+const Home: React.FC = () => {
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-    {/* Features section */}
-    <section className="features-section" id="features">
-      <div className="feature-card">
-        <div className="feature-icon">🔍</div>
-        <div className="feature-title">SEO Optimization</div>
-        <div className="feature-description">AI-powered SEO analysis and recommendations to improve search rankings</div>
-      </div>
-      <div className="feature-card">
-        <div className="feature-icon">🧪</div>
-        <div className="feature-title">A/B Testing</div>
-        <div className="feature-description">Intelligent A/B testing to optimize conversion rates and user experience</div>
-      </div>
-      <div className="feature-card">
-        <div className="feature-icon">🎨</div>
-        <div className="feature-title">UI/UX Design</div>
-        <div className="feature-description">AI-driven design suggestions to enhance user interface and experience</div>
-      </div>
-      <div className="feature-card">
-        <div className="feature-icon">📊</div>
-        <div className="feature-title">Analytics</div>
-        <div className="feature-description">Comprehensive analytics and insights to track performance metrics</div>
-      </div>
-      <div className="feature-card">
-        <div className="feature-icon">🚀</div>
-        <div className="feature-title">Performance</div>
-        <div className="feature-description">Website performance optimization for faster loading and better user experience</div>
-      </div>
-    </section>
-  </>
-);
+  const handleLogout = () => {
+    navigate('/login');
+  };
+
+  const handleCreateProject = async (projectData: ProjectData) => {
+    setIsLoading(true);
+    try {
+      // Make API call to backend scraping service
+      const response = await fetch('http://localhost:8080/api/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: projectData.websiteUrl,
+          user_email: 'olivia@strata.com', // This should come from user authentication
+          category: projectData.category,
+          description: projectData.description
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to scrape website');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Show success message or redirect to results
+        alert('Website successfully scraped! Check the scraper page for results.');
+        navigate('/scraper');
+      } else {
+        throw new Error(result.error || 'Failed to scrape website');
+      }
+    } catch (error) {
+      console.error('Error scraping website:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to scrape website'}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="dashboard-container">
+      <Sidebar
+        userName="Olivia Rhye"
+        userEmail="olivia@strata.com"
+        userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
+        onLogout={handleLogout}
+      />
+
+      <main className="dashboard-main-content">
+        <div className="home-content">
+          <div className="home-header">
+            <h1>Welcome back, Olivia</h1>
+            <p>Get started by creating a new project to analyze your website.</p>
+          </div>
+
+          <div className="home-actions">
+            <div className="create-project-card">
+              <div className="project-card-icon">
+                <i className="fas fa-plus"></i>
+              </div>
+              <h3>Create New Project</h3>
+              <p>Start by entering your website URL to analyze and optimize your site's performance.</p>
+              <button 
+                className="create-project-btn"
+                onClick={() => setIsModalOpen(true)}
+                disabled={isLoading}
+              >
+                <i className="fas fa-folder-plus"></i>
+                New Project
+              </button>
+            </div>
+
+            <div className="quick-stats">
+              <div className="stat-item">
+                <div className="stat-number">12</div>
+                <div className="stat-label">Projects Created</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">847</div>
+                <div className="stat-label">Pages Analyzed</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">98%</div>
+                <div className="stat-label">Success Rate</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="recent-projects">
+            <h2>Recent Projects</h2>
+            <div className="projects-list">
+              <div className="project-item">
+                <div className="project-info">
+                  <h4>healthtech.com</h4>
+                  <p>Health Tech • Created 2 days ago</p>
+                </div>
+                <div className="project-status">
+                  <span className="status-badge completed">Completed</span>
+                </div>
+              </div>
+              <div className="project-item">
+                <div className="project-info">
+                  <h4>ecommerce-store.com</h4>
+                  <p>E-commerce • Created 5 days ago</p>
+                </div>
+                <div className="project-status">
+                  <span className="status-badge completed">Completed</span>
+                </div>
+              </div>
+              <div className="project-item">
+                <div className="project-info">
+                  <h4>saas-platform.io</h4>
+                  <p>SaaS • Created 1 week ago</p>
+                </div>
+                <div className="project-status">
+                  <span className="status-badge completed">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <CreateProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleCreateProject}
+      />
+    </div>
+  );
+};
 
 export default Home; 
