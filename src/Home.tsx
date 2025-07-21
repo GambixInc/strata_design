@@ -212,7 +212,13 @@ const Home: React.FC = () => {
           {scrapedResults && (
             <div className="results-section">
               <div className="results-header">
-                <h2>SEO Analysis Results</h2>
+                <div className="results-breadcrumb">
+                  <button onClick={clearResults} className="breadcrumb-home">
+                    <i className="fas fa-home"></i> Dashboard
+                  </button>
+                  <i className="fas fa-chevron-right breadcrumb-separator"></i>
+                  <span className="breadcrumb-current">SEO Analysis Results</span>
+                </div>
                 <button onClick={clearResults} className="clear-results-btn">
                   <i className="fas fa-times"></i> Clear Results
                 </button>
@@ -287,6 +293,9 @@ const Home: React.FC = () => {
               <div className="results-actions">
                 <button onClick={() => setIsModalOpen(true)} className="analyze-another-btn">
                   <i className="fas fa-plus"></i> Analyze Another Website
+                </button>
+                <button onClick={clearResults} className="back-to-dashboard-btn">
+                  <i className="fas fa-home"></i> Back to Dashboard
                 </button>
               </div>
             </div>
