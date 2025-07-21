@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import CreateProjectModal from './components/CreateProjectModal';
@@ -27,12 +27,78 @@ interface ScrapedResults {
   timestamp: string;
 }
 
+interface UserStats {
+  total_projects: number;
+  total_pages: number;
+  success_rate: number;
+}
+
+interface RecentProject {
+  url: string;
+  category: string;
+  timestamp: string;
+  status: 'completed' | 'processing' | 'failed';
+}
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [scrapedResults, setScrapedResults] = useState<ScrapedResults | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userStats, setUserStats] = useState<UserStats>({ total_projects: 0, total_pages: 0, success_rate: 0 });
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  const userEmail = 'olivia@strata.com'; // This should come from authentication context
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    setDataLoading(true);
+    try {
+      // Fetch user's scraped sites and stats
+      const response = await fetch(`http://localhost:8080/api/user-sites?email=${encodeURIComponent(userEmail)}`);
+      if (response.ok) {
+        const userData = await response.json();
+        
+        // Calculate stats from user data
+        const projects = userData.sites || [];
+        const totalProjects = projects.length;
+        const totalPages = projects.reduce((sum: number, project: any) => sum + (project.pages_scraped || 1), 0);
+        const successfulProjects = projects.filter((project: any) => project.status !== 'failed').length;
+        const successRate = totalProjects > 0 ? Math.round((successfulProjects / totalProjects) * 100) : 0;
+
+        setUserStats({
+          total_projects: totalProjects,
+          total_pages: totalPages,
+          success_rate: successRate
+        });
+
+        // Set recent projects (last 3)
+        const recentProjectsData = projects
+          .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 3)
+          .map((project: any) => ({
+            url: project.url,
+            category: project.category || 'Website',
+            timestamp: project.timestamp,
+            status: project.status || 'completed'
+          }));
+
+        setRecentProjects(recentProjectsData);
+      } else {
+        console.warn('Failed to fetch user data, using defaults');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     navigate('/login');
@@ -52,7 +118,7 @@ const Home: React.FC = () => {
         },
         body: JSON.stringify({
           url: projectData.websiteUrl,
-          user_email: 'olivia@strata.com', // This should come from user authentication
+          user_email: userEmail,
           category: projectData.category,
           description: projectData.description
         }),
@@ -73,6 +139,9 @@ const Home: React.FC = () => {
           saved_directory: result.data.saved_directory || '',
           timestamp: new Date().toISOString()
         });
+
+        // Refresh user data to show updated stats
+        await fetchUserData();
       } else {
         throw new Error(result.error || 'Failed to scrape website');
       }
@@ -89,11 +158,32 @@ const Home: React.FC = () => {
     setError(null);
   };
 
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'completed': return 'status-badge completed';
+      case 'processing': return 'status-badge processing';
+      case 'failed': return 'status-badge failed';
+      default: return 'status-badge completed';
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <Sidebar
         userName="Olivia Rhye"
-        userEmail="olivia@strata.com"
+        userEmail={userEmail}
         userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
         onLogout={handleLogout}
       />
@@ -229,52 +319,58 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className="quick-stats">
-                  <div className="stat-item">
-                    <div className="stat-number">12</div>
-                    <div className="stat-label">Projects Created</div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-number">847</div>
-                    <div className="stat-label">Pages Analyzed</div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-number">98%</div>
-                    <div className="stat-label">Success Rate</div>
-                  </div>
+                  {dataLoading ? (
+                    <div className="stats-loading">
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Loading stats...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="stat-item">
+                        <div className="stat-number">{userStats.total_projects}</div>
+                        <div className="stat-label">Projects Created</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-number">{userStats.total_pages}</div>
+                        <div className="stat-label">Pages Analyzed</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-number">{userStats.success_rate}%</div>
+                        <div className="stat-label">Success Rate</div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="recent-projects">
                 <h2>Recent Projects</h2>
-                <div className="projects-list">
-                  <div className="project-item">
-                    <div className="project-info">
-                      <h4>healthtech.com</h4>
-                      <p>Health Tech • Created 2 days ago</p>
-                    </div>
-                    <div className="project-status">
-                      <span className="status-badge completed">Completed</span>
-                    </div>
+                {dataLoading ? (
+                  <div className="projects-loading">
+                    <i className="fas fa-spinner fa-spin"></i>
+                    <span>Loading projects...</span>
                   </div>
-                  <div className="project-item">
-                    <div className="project-info">
-                      <h4>ecommerce-store.com</h4>
-                      <p>E-commerce • Created 5 days ago</p>
-                    </div>
-                    <div className="project-status">
-                      <span className="status-badge completed">Completed</span>
-                    </div>
+                ) : recentProjects.length > 0 ? (
+                  <div className="projects-list">
+                    {recentProjects.map((project, index) => (
+                      <div key={index} className="project-item">
+                        <div className="project-info">
+                          <h4>{project.url}</h4>
+                          <p>{project.category} • {formatTimeAgo(project.timestamp)}</p>
+                        </div>
+                        <div className="project-status">
+                          <span className={getStatusBadgeClass(project.status)}>
+                            {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="project-item">
-                    <div className="project-info">
-                      <h4>saas-platform.io</h4>
-                      <p>SaaS • Created 1 week ago</p>
-                    </div>
-                    <div className="project-status">
-                      <span className="status-badge completed">Completed</span>
-                    </div>
+                ) : (
+                  <div className="no-projects">
+                    <p>No projects yet. Create your first project to get started!</p>
                   </div>
-                </div>
+                )}
               </div>
             </>
           )}
