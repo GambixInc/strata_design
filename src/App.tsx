@@ -1,5 +1,4 @@
 // App.tsx - Main entry point for React Router and app structure
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Home'; // Home page
 import Login from './Login'; // Login page

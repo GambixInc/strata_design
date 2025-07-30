@@ -24,24 +24,6 @@ interface FileData {
   optimized_files: Array<{ name: string }>;
 }
 
-interface TrackerStats {
-  total_sites: number;
-  total_scrapes: number;
-  total_optimizations: number;
-  recent_activities: any[];
-}
-
-interface TrackedSite {
-  domain: string;
-  scrapes: any[];
-  optimizations: any[];
-  first_scraped: string;
-}
-
-interface TrackerSites {
-  [key: string]: TrackedSite;
-}
-
 const Scraper: React.FC = () => {
   // State for tabs, form fields, and data
   const [activeTab, setActiveTab] = useState<string>('results');
@@ -50,9 +32,6 @@ const Scraper: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [files, setFiles] = useState<FileData | null>(null);
-  const [trackerStats, setTrackerStats] = useState<TrackerStats | null>(null);
-  const [trackerSummary, setTrackerSummary] = useState<string>('');
-  const [trackedSites, setTrackedSites] = useState<TrackerSites | null>(null);
   const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Utility: show alert message
@@ -137,54 +116,6 @@ const Scraper: React.FC = () => {
 
       if (result.success) {
         setFiles(result.data);
-      } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
-      }
-    } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-    }
-  };
-
-  // Load tracker stats from backend
-  const loadTrackerStats = async () => {
-    try {
-      const response = await fetch('/api/tracker/stats');
-      const result = await response.json();
-
-      if (result.success) {
-        setTrackerStats(result.data);
-      } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
-      }
-    } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-    }
-  };
-
-  // Load tracker summary from backend
-  const loadTrackerSummary = async () => {
-    try {
-      const response = await fetch('/api/tracker/summary');
-      const result = await response.json();
-
-      if (result.success) {
-        setTrackerSummary(result.data.summary);
-      } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
-      }
-    } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-    }
-  };
-
-  // Load tracked sites from backend
-  const loadTrackedSites = async () => {
-    try {
-      const response = await fetch('/api/tracker/sites');
-      const result = await response.json();
-
-      if (result.success) {
-        setTrackedSites(result.data);
       } else {
         showAlert(`❌ Error: ${result.error}`, 'error');
       }
