@@ -190,34 +190,27 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="dashboard-container">
-      <div className="header">
-        <h1><i className="fas fa-chart-line"></i> {currentUser ? `Welcome, ${currentUser.name}` : 'SEO & Analytics Dashboard'}</h1>
-        <p>Comprehensive analysis and insights for your scraped websites</p>
-        {currentUser && (
-          <div className="user-info">
-            <div className="user-details">
-              <div className="user-name">{currentUser.name}</div>
-              <div className="user-role">{currentUser.role}</div>
-            </div>
-            <button className="logout-btn" onClick={handleLogout}>Logout</button>
-          </div>
-        )}
-      </div>
-
-      <div className="nav-bar">
+    <div className="home-container">
+      <div className="main-nav">
+        <div className="logo">Strata</div>
         <div className="nav-links">
-          <Link to="/scraper" className="nav-link"><i className="fas fa-spider"></i> Web Scraper</Link>
-          <Link to="/" className="nav-link"><i className="fas fa-home"></i> Home</Link>
+          <Link to="/scraper" className="nav-link">Web Scraper</Link>
+          <Link to="/" className="nav-link">Home</Link>
+          {currentUser ? (
+             <button className="logout-btn-nav" onClick={handleLogout}>Logout</button>
+          ) : (
+            <Link to="/login" className="nav-link-login">Login</Link>
+          )}
         </div>
-        {!currentUser && (
-           <Link to="/login" className="nav-link"><i className="fas fa-sign-in-alt"></i> Login</Link>
-        )}
-        <div style={{ fontWeight: 600, color: '#4a4a8a' }}><i className="fas fa-tools"></i> Strata Tools</div>
       </div>
 
       {currentUser ? (
-        <>
+        // Logged-in user dashboard
+        <div className="dashboard-container">
+           <div className="header">
+                <h1><i className="fas fa-chart-line"></i> Welcome, {currentUser.name}</h1>
+                <p>Comprehensive analysis and insights for your scraped websites</p>
+            </div>
           {sites.length > 0 ? (
             <div className="site-selector">
               <label htmlFor="siteSelect"><strong>Select Scraped Site:</strong></label>
@@ -271,7 +264,6 @@ const Home: React.FC = () => {
                       </div>
                       <div className="card-title">SEO Overview</div>
                     </div>
-                    {/* SEO Overview Content */}
                   </div>
                   <div className="card">
                     <div className="card-header">
@@ -280,7 +272,6 @@ const Home: React.FC = () => {
                       </div>
                       <div className="card-title">Performance Metrics</div>
                     </div>
-                    {/* Performance Metrics Content */}
                   </div>
                   <div className="card">
                     <div className="card-header">
@@ -289,7 +280,6 @@ const Home: React.FC = () => {
                       </div>
                       <div className="card-title">Content Analysis</div>
                     </div>
-                    {/* Content Analysis Content */}
                   </div>
                   <div className="card full-width">
                     <div className="card-header">
@@ -311,30 +301,68 @@ const Home: React.FC = () => {
                     </div>
                     <div className="card-title">Analytics Tracking</div>
                   </div>
-                  {/* Analytics Tracking Content */}
                 </div>
               )}
             </div>
           )}
-        </>
+        </div>
       ) : (
-        <div className="no-sites-message">
-          <div className="card">
-            <div className="card-header">
-              <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)' }}>
-                <i className="fas fa-info-circle"></i>
-              </div>
-              <div className="card-title">Welcome to Strata</div>
-            </div>
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '20px' }}>
-                Please log in to access your dashboard and view your scraped site analytics.
-              </p>
-              <Link to="/login" className="cta-button" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                <i className="fas fa-sign-in-alt"></i> Login
-              </Link>
-            </div>
-          </div>
+        // Guest user marketing page
+        <div className="marketing-page">
+            <header className="hero-section">
+                <div className="hero-content">
+                    <h1>Enhance Your Digital Presence with Strata</h1>
+                    <p>Advanced solutions for digital optimization, marketing, CRO, and SEO to boost your online growth.</p>
+                    <Link to="/login" className="cta-button-hero">Get Started for Free</Link>
+                </div>
+            </header>
+
+            <main>
+                <section className="services-overview">
+                    <h2>Our Core Services</h2>
+                    <div className="service-cards">
+                        <div className="service-card">
+                            <div className="service-icon"><i className="fas fa-chart-line"></i></div>
+                            <h3>Conversion Rate Optimization (CRO) & A/B Testing</h3>
+                            <p>Experiment with website elements, copy, and UI to improve conversion rates and user experience. Features include automated experimentation, personalized testing, and detailed analytics.</p>
+                        </div>
+                        <div className="service-card">
+                            <div className="service-icon"><i className="fas fa-search-dollar"></i></div>
+                            <h3>SEO & Content Marketing</h3>
+                            <p>Boost your organic search rankings with AI-powered content creation, technical SEO audits, keyword research, and content generation for blogs, social media, and more.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="features-section">
+                    <h2>Why Strata?</h2>
+                    <div className="feature-list">
+                        <div className="feature-item">
+                            <div className="feature-icon"><i className="fas fa-robot"></i></div>
+                            <h4>AI-Powered Insights</h4>
+                            <p>Leverage artificial intelligence to automate content creation and gain deep insights into user behavior.</p>
+                        </div>
+                        <div className="feature-item">
+                            <div className="feature-icon"><i className="fas fa-vials"></i></div>
+                            <h4>Data-Driven Experimentation</h4>
+                            <p>Run A/B tests and personalized experiments to find what truly works for your audience.</p>
+                        </div>
+                        <div className="feature-item">
+                            <div className="feature-icon"><i className="fas fa-tachometer-alt"></i></div>
+                            <h4>Comprehensive Analytics</h4>
+                            <p>Track your performance with detailed analytics and see the real impact of your optimizations.</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer className="marketing-footer">
+                <div className="footer-content">
+                    <h2>Ready to Optimize Your Online Presence?</h2>
+                    <p>Join Strata today and take the first step towards a better digital strategy.</p>
+                    <Link to="/login" className="cta-button-footer">Sign Up Now</Link>
+                </div>
+            </footer>
         </div>
       )}
     </div>
