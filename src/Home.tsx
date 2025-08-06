@@ -65,12 +65,11 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const user = localStorage.getItem('currentUser');
-    if (!user) {
-      navigate('/login');
-    } else {
+    if (user) {
       setCurrentUser(JSON.parse(user));
     }
-  }, [navigate]);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -79,6 +78,7 @@ const Home: React.FC = () => {
   }, [currentUser]);
 
   const fetchSites = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/sites`);
       if (response.ok) {
@@ -140,7 +140,8 @@ const Home: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    navigate('/login');
+    setCurrentUser(null);
+    navigate('/');
   };
 
   const renderSeoChart = () => {
@@ -178,12 +179,12 @@ const Home: React.FC = () => {
       </div>
     );
   };
-  
-  if (!currentUser) {
+
+  if (loading) {
     return (
       <div className="loading">
         <i className="fas fa-spinner fa-spin"></i>
-        <p>Loading user data...</p>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -191,15 +192,17 @@ const Home: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="header">
-        <h1><i className="fas fa-chart-line"></i> Welcome, {currentUser.name}</h1>
+        <h1><i className="fas fa-chart-line"></i> {currentUser ? `Welcome, ${currentUser.name}` : 'SEO & Analytics Dashboard'}</h1>
         <p>Comprehensive analysis and insights for your scraped websites</p>
-        <div className="user-info">
-          <div className="user-details">
-            <div className="user-name">{currentUser.name}</div>
-            <div className="user-role">{currentUser.role}</div>
+        {currentUser && (
+          <div className="user-info">
+            <div className="user-details">
+              <div className="user-name">{currentUser.name}</div>
+              <div className="user-role">{currentUser.role}</div>
+            </div>
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
           </div>
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
+        )}
       </div>
 
       <div className="nav-bar">
@@ -207,19 +210,113 @@ const Home: React.FC = () => {
           <Link to="/scraper" className="nav-link"><i className="fas fa-spider"></i> Web Scraper</Link>
           <Link to="/" className="nav-link"><i className="fas fa-home"></i> Home</Link>
         </div>
+        {!currentUser && (
+           <Link to="/login" className="nav-link"><i className="fas fa-sign-in-alt"></i> Login</Link>
+        )}
         <div style={{ fontWeight: 600, color: '#4a4a8a' }}><i className="fas fa-tools"></i> Strata Tools</div>
       </div>
 
-      {sites.length > 0 ? (
-        <div className="site-selector">
-          <label htmlFor="siteSelect"><strong>Select Scraped Site:</strong></label>
-          <select id="siteSelect" value={selectedSite} onChange={handleSiteChange}>
-            <option value="">Choose a site to analyze...</option>
-            {sites.map(site => (
-              <option key={site} value={site}>{site}</option>
-            ))}
-          </select>
-        </div>
+      {currentUser ? (
+        <>
+          {sites.length > 0 ? (
+            <div className="site-selector">
+              <label htmlFor="siteSelect"><strong>Select Scraped Site:</strong></label>
+              <select id="siteSelect" value={selectedSite} onChange={handleSiteChange}>
+                <option value="">Choose a site to analyze...</option>
+                {sites.map(site => (
+                  <option key={site} value={site}>{site}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="no-sites-message">
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)' }}>
+                    <i className="fas fa-info-circle"></i>
+                  </div>
+                  <div className="card-title">No Sites Available</div>
+                </div>
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '20px' }}>
+                    No scraped sites found for your account.
+                  </p>
+                  <p style={{ color: '#888', marginBottom: '30px' }}>
+                    To see analytics and SEO insights, you need to scrape some websites first.
+                  </p>
+                  <Link to="/scraper" className="cta-button" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                    <i className="fas fa-spider"></i> Start Scraping Websites
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedSite && (
+            <div className="dashboard-grid">
+              {loading && (
+                <div className="loading full-width">
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <p>Loading reports...</p>
+                </div>
+              )}
+              {error && <div className="error full-width">{error}</div>}
+
+              {analysisReport && (
+                <>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
+                        <i className="fas fa-search"></i>
+                      </div>
+                      <div className="card-title">SEO Overview</div>
+                    </div>
+                    {/* SEO Overview Content */}
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)' }}>
+                        <i className="fas fa-tachometer-alt"></i>
+                      </div>
+                      <div className="card-title">Performance Metrics</div>
+                    </div>
+                    {/* Performance Metrics Content */}
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)' }}>
+                        <i className="fas fa-file-alt"></i>
+                      </div>
+                      <div className="card-title">Content Analysis</div>
+                    </div>
+                    {/* Content Analysis Content */}
+                  </div>
+                  <div className="card full-width">
+                    <div className="card-header">
+                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)' }}>
+                        <i className="fas fa-chart-pie"></i>
+                      </div>
+                      <div className="card-title">SEO Score Breakdown</div>
+                    </div>
+                    {renderSeoChart()}
+                  </div>
+                </>
+              )}
+
+              {analyticsReport && (
+                <div className="card">
+                  <div className="card-header">
+                    <div className="card-icon" style={{ background: 'linear-gradient(135deg, #dc3545 0%, #e83e8c 100%)' }}>
+                      <i className="fas fa-chart-bar"></i>
+                    </div>
+                    <div className="card-title">Analytics Tracking</div>
+                  </div>
+                  {/* Analytics Tracking Content */}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       ) : (
         <div className="no-sites-message">
           <div className="card">
@@ -227,85 +324,17 @@ const Home: React.FC = () => {
               <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)' }}>
                 <i className="fas fa-info-circle"></i>
               </div>
-              <div className="card-title">No Sites Available</div>
+              <div className="card-title">Welcome to Strata</div>
             </div>
             <div style={{ textAlign: 'center', padding: '40px' }}>
               <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '20px' }}>
-                No scraped sites found for your account.
+                Please log in to access your dashboard and view your scraped site analytics.
               </p>
-              <p style={{ color: '#888', marginBottom: '30px' }}>
-                To see analytics and SEO insights, you need to scrape some websites first.
-              </p>
-              <Link to="/scraper" className="cta-button" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                <i className="fas fa-spider"></i> Start Scraping Websites
+              <Link to="/login" className="cta-button" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                <i className="fas fa-sign-in-alt"></i> Login
               </Link>
             </div>
           </div>
-        </div>
-      )}
-
-      {selectedSite && (
-        <div className="dashboard-grid">
-          {loading && (
-            <div className="loading full-width">
-              <i className="fas fa-spinner fa-spin"></i>
-              <p>Loading reports...</p>
-            </div>
-          )}
-          {error && <div className="error full-width">{error}</div>}
-
-          {analysisReport && (
-            <>
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
-                    <i className="fas fa-search"></i>
-                  </div>
-                  <div className="card-title">SEO Overview</div>
-                </div>
-                {/* SEO Overview Content */}
-              </div>
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)' }}>
-                    <i className="fas fa-tachometer-alt"></i>
-                  </div>
-                  <div className="card-title">Performance Metrics</div>
-                </div>
-                {/* Performance Metrics Content */}
-              </div>
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)' }}>
-                    <i className="fas fa-file-alt"></i>
-                  </div>
-                  <div className="card-title">Content Analysis</div>
-                </div>
-                {/* Content Analysis Content */}
-              </div>
-              <div className="card full-width">
-                <div className="card-header">
-                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)' }}>
-                    <i className="fas fa-chart-pie"></i>
-                  </div>
-                  <div className="card-title">SEO Score Breakdown</div>
-                </div>
-                {renderSeoChart()}
-              </div>
-            </>
-          )}
-
-          {analyticsReport && (
-            <div className="card">
-              <div className="card-header">
-                <div className="card-icon" style={{ background: 'linear-gradient(135deg, #dc3545 0%, #e83e8c 100%)' }}>
-                  <i className="fas fa-chart-bar"></i>
-                </div>
-                <div className="card-title">Analytics Tracking</div>
-              </div>
-              {/* Analytics Tracking Content */}
-            </div>
-          )}
         </div>
       )}
     </div>
