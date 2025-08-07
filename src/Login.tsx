@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
 import './Login.css';
+import { useRedirectIfSignedIn } from './hooks/useRedirectIfSignedIn';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
+    useRedirectIfSignedIn('/');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -18,25 +20,25 @@ const Login: React.FC = () => {
         setError(null);
 
         try {
-            const { isSignedIn } = await signIn({ username: email, password });
-            
-            if (isSignedIn) {
-                const [attributes, session] = await Promise.all([
-                    fetchUserAttributes(),
-                    fetchAuthSession()
-                ]);
+            await signIn({ username: email, password });
 
+            const [attributes, session] = await Promise.all([
+                fetchUserAttributes().catch(() => ({} as any)),
+                fetchAuthSession(),
+            ]);
+
+            if (session.tokens) {
                 const groups = session.tokens?.accessToken.payload["cognito:groups"] as string[] | undefined;
 
                 localStorage.setItem('currentUser', JSON.stringify({
-                    name: attributes.name || attributes.email,
+                    name: (attributes as any).name || (attributes as any).email || email,
                     role: groups?.[0] || 'user',
-                    email: attributes.email,
+                    email,
                 }));
-    
-                navigate('/');
+
+                navigate('/', { replace: true });
             } else {
-                setError('Sign in was not successful. Please check your credentials.');
+                setError('Sign in incomplete. Please complete any required steps (MFA/verification).');
             }
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred');
