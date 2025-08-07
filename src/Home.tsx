@@ -190,23 +190,28 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="home-container">
-      <div className="main-nav">
-        <div className="logo">Strata</div>
-        <div className="nav-links">
-          <Link to="/scraper" className="nav-link">Web Scraper</Link>
-          <Link to="/" className="nav-link">Home</Link>
-          {currentUser ? (
-             <button className="logout-btn-nav" onClick={handleLogout}>Logout</button>
-          ) : (
-            <Link to="/login" className="nav-link-login">Login</Link>
-          )}
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
+      <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
+            <span>Strata</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/scraper" className="text-sm font-medium text-slate-600 hover:text-slate-900">Web Scraper</Link>
+            <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
+            {currentUser ? (
+              <button onClick={handleLogout} className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">Logout</button>
+            ) : (
+              <Link to="/login" className="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">Login</Link>
+            )}
+          </div>
         </div>
-      </div>
+      </nav>
 
       {currentUser ? (
         // Logged-in user dashboard
-        <div className="dashboard-container">
+        <div className="dashboard-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8">
            <div className="header">
                 <h1><i className="fas fa-chart-line"></i> Welcome, {currentUser.name}</h1>
                 <p>Comprehensive analysis and insights for your scraped websites</p>
@@ -307,62 +312,78 @@ const Home: React.FC = () => {
           )}
         </div>
       ) : (
-        // Guest user marketing page
-        <div className="marketing-page">
-            <header className="hero-section">
-                <div className="hero-content">
-                    <h1>Enhance Your Digital Presence with Strata</h1>
-                    <p>Advanced solutions for digital optimization, marketing, CRO, and SEO to boost your online growth.</p>
-                    <Link to="/login" className="cta-button-hero">Get Started for Free</Link>
+        // Guest user marketing page styled with Tailwind
+        <div>
+          {/* HERO */}
+          <header className="relative isolate overflow-hidden bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white">
+            <div className="absolute inset-0 -z-10 opacity-30 blur-3xl" aria-hidden="true" />
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-24">
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium ring-1 ring-inset ring-white/20">
+                    <span className="h-2 w-2 rounded-full bg-white" />
+                    New: AI‑powered site insights
+                  </span>
+                  <h1 className="mt-6 text-4xl sm:text-5xl font-extrabold tracking-tight">
+                    Enhance your digital presence with <span className="text-white/90">Strata</span>
+                  </h1>
+                  <p className="mt-4 text-lg leading-8 text-white/80">
+                    Audit, analyze and improve with modern tools for SEO, analytics and CRO — all in one place.
+                  </p>
+                  <ul className="mt-6 space-y-3 text-white/85">
+                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> One-click audits and health checks</li>
+                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> Keyword and content insights</li>
+                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> Clear analytics that drive action</li>
+                  </ul>
+                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                    <Link to="/login" className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100">
+                      Get started for free
+                    </Link>
+                    <a href="#features" className="text-sm font-semibold text-white/90 hover:text-white">Learn more →</a>
+                  </div>
                 </div>
-            </header>
-
-            <main>
-                <section className="services-overview">
-                    <h2>Our Core Services</h2>
-                    <div className="service-cards">
-                        <div className="service-card">
-                            <div className="service-icon"><i className="fas fa-chart-line"></i></div>
-                            <h3>Conversion Rate Optimization (CRO) & A/B Testing</h3>
-                            <p>Experiment with website elements, copy, and UI to improve conversion rates and user experience. Features include automated experimentation, personalized testing, and detailed analytics.</p>
-                        </div>
-                        <div className="service-card">
-                            <div className="service-icon"><i className="fas fa-search-dollar"></i></div>
-                            <h3>SEO & Content Marketing</h3>
-                            <p>Boost your organic search rankings with AI-powered content creation, technical SEO audits, keyword research, and content generation for blogs, social media, and more.</p>
-                        </div>
+                <div className="relative">
+                  <div className="rounded-2xl bg-white/10 backdrop-blur shadow-xl ring-1 ring-white/20 p-4">
+                    <div className="h-64 sm:h-80 rounded-lg bg-gradient-to-br from-white/20 to-white/0 flex items-center justify-center text-white text-2xl font-bold">
+                      Dashboard Preview
                     </div>
-                </section>
-
-                <section className="features-section">
-                    <h2>Why Strata?</h2>
-                    <div className="feature-list">
-                        <div className="feature-item">
-                            <div className="feature-icon"><i className="fas fa-robot"></i></div>
-                            <h4>AI-Powered Insights</h4>
-                            <p>Leverage artificial intelligence to automate content creation and gain deep insights into user behavior.</p>
-                        </div>
-                        <div className="feature-item">
-                            <div className="feature-icon"><i className="fas fa-vials"></i></div>
-                            <h4>Data-Driven Experimentation</h4>
-                            <p>Run A/B tests and personalized experiments to find what truly works for your audience.</p>
-                        </div>
-                        <div className="feature-item">
-                            <div className="feature-icon"><i className="fas fa-tachometer-alt"></i></div>
-                            <h4>Comprehensive Analytics</h4>
-                            <p>Track your performance with detailed analytics and see the real impact of your optimizations.</p>
-                        </div>
-                    </div>
-                </section>
-            </main>
-
-            <footer className="marketing-footer">
-                <div className="footer-content">
-                    <h2>Ready to Optimize Your Online Presence?</h2>
-                    <p>Join Strata today and take the first step towards a better digital strategy.</p>
-                    <Link to="/login" className="cta-button-footer">Sign Up Now</Link>
+                  </div>
                 </div>
-            </footer>
+              </div>
+            </div>
+          </header>
+
+          {/* FEATURES */}
+          <main id="features" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+            <section className="grid md:grid-cols-3 gap-6">
+              {[
+                { title: 'CRO & A/B Testing', desc: 'Experiment with UI and copy to lift conversions with confidence.', color: 'from-violet-600 to-fuchsia-600', icon: '⟲' },
+                { title: 'SEO & Content', desc: 'Generate content, fix technical issues and track search impact.', color: 'from-emerald-600 to-teal-600', icon: '⚙' },
+                { title: 'Analytics', desc: 'Unified tracking insights to understand what drives results.', color: 'from-amber-500 to-orange-500', icon: '📊' },
+              ].map((f) => (
+                <div key={f.title} className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                  <div className={`h-10 w-10 rounded-lg text-white flex items-center justify-center bg-gradient-to-br ${f.color}`}>{f.icon}</div>
+                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{f.title}</h3>
+                  <p className="mt-2 text-slate-600">{f.desc}</p>
+                </div>
+              ))}
+            </section>
+
+            {/* CTA */}
+            <section className="mt-16 rounded-2xl bg-slate-900 p-8 sm:p-12 text-white">
+              <div className="grid lg:grid-cols-2 gap-10 items-center">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold">Ready to optimize your online presence?</h2>
+                  <p className="mt-3 text-slate-300">Join Strata today and start with a free account. No credit card required.</p>
+                </div>
+                <div className="flex lg:justify-end">
+                  <Link to="/login" className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100">
+                    Create your free account
+                  </Link>
+                </div>
+              </div>
+            </section>
+          </main>
         </div>
       )}
     </div>

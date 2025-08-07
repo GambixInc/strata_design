@@ -1,10 +1,4 @@
-/* General Body and Container Styles */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f7f6;
-    color: #333;
-    line-height: 1.6;
-}
+/* Keep global styles minimal to avoid fighting Tailwind */
 
 .home-container {
     width: 100%;
