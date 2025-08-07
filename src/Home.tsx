@@ -315,37 +315,70 @@ const Home: React.FC = () => {
         // Guest user marketing page styled with Tailwind
         <div>
           {/* HERO */}
-          <header className="relative isolate overflow-hidden bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white">
-            <div className="absolute inset-0 -z-10 opacity-30 blur-3xl" aria-hidden="true" />
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-24">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium ring-1 ring-inset ring-white/20">
-                    <span className="h-2 w-2 rounded-full bg-white" />
-                    New: AI‑powered site insights
+          <header className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="relative mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-20">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  New: AI‑powered site insights
+                </div>
+                <h1 className="mt-8 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+                  Enhance your digital presence with{' '}
+                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    Strata
                   </span>
-                  <h1 className="mt-6 text-4xl sm:text-5xl font-extrabold tracking-tight">
-                    Enhance your digital presence with <span className="text-white/90">Strata</span>
-                  </h1>
-                  <p className="mt-4 text-lg leading-8 text-white/80">
-                    Audit, analyze and improve with modern tools for SEO, analytics and CRO — all in one place.
-                  </p>
-                  <ul className="mt-6 space-y-3 text-white/85">
-                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> One-click audits and health checks</li>
-                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> Keyword and content insights</li>
-                    <li className="flex items-center gap-3"><span className="h-5 w-5 rounded-full bg-white/20 grid place-items-center">✓</span> Clear analytics that drive action</li>
-                  </ul>
-                  <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <Link to="/login" className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100">
-                      Get started for free
-                    </Link>
-                    <a href="#features" className="text-sm font-semibold text-white/90 hover:text-white">Learn more →</a>
+                </h1>
+                <p className="mt-6 max-w-2xl mx-auto text-xl leading-8 text-white/90">
+                  Audit, analyze and improve with modern tools for SEO, analytics and CRO — all in one place.
+                </p>
+                
+                <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/85">
+                  <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    One-click audits and health checks
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Keyword and content insights
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Clear analytics that drive action
                   </div>
                 </div>
-                <div className="relative">
-                  <div className="rounded-2xl bg-white/10 backdrop-blur shadow-xl ring-1 ring-white/20 p-4">
-                    <div className="h-64 sm:h-80 rounded-lg bg-gradient-to-br from-white/20 to-white/0 flex items-center justify-center text-white text-2xl font-bold">
-                      Dashboard Preview
+                
+                <div className="mt-10 flex flex-wrap justify-center gap-4">
+                  <Link 
+                    to="/login" 
+                    className="inline-flex items-center rounded-lg bg-white px-6 py-3 text-base font-semibold text-slate-900 shadow-lg hover:bg-slate-50 hover:shadow-xl transition-all duration-200"
+                  >
+                    Get started for free
+                  </Link>
+                  <a 
+                    href="#features" 
+                    className="inline-flex items-center rounded-lg border border-white/30 px-6 py-3 text-base font-semibold text-white hover:bg-white/10 transition-all duration-200"
+                  >
+                    Learn more
+                  </a>
+                </div>
+              </div>
+              
+              {/* Dashboard Preview */}
+              <div className="mt-16 relative">
+                <div className="rounded-2xl bg-white/10 backdrop-blur border border-white/20 p-6 shadow-2xl">
+                  <div className="h-64 sm:h-80 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-2xl font-bold mb-4">
+                        S
+                      </div>
+                      <p className="text-slate-600 font-medium">Dashboard Preview</p>
                     </div>
                   </div>
                 </div>
@@ -354,36 +387,83 @@ const Home: React.FC = () => {
           </header>
 
           {/* FEATURES */}
-          <main id="features" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-            <section className="grid md:grid-cols-3 gap-6">
-              {[
-                { title: 'CRO & A/B Testing', desc: 'Experiment with UI and copy to lift conversions with confidence.', color: 'from-violet-600 to-fuchsia-600', icon: '⟲' },
-                { title: 'SEO & Content', desc: 'Generate content, fix technical issues and track search impact.', color: 'from-emerald-600 to-teal-600', icon: '⚙' },
-                { title: 'Analytics', desc: 'Unified tracking insights to understand what drives results.', color: 'from-amber-500 to-orange-500', icon: '📊' },
-              ].map((f) => (
-                <div key={f.title} className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                  <div className={`h-10 w-10 rounded-lg text-white flex items-center justify-center bg-gradient-to-br ${f.color}`}>{f.icon}</div>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{f.title}</h3>
-                  <p className="mt-2 text-slate-600">{f.desc}</p>
-                </div>
-              ))}
-            </section>
+          <main className="bg-slate-50 py-20">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                  Everything you need to grow
+                </h2>
+                <p className="mt-4 text-lg text-slate-600">
+                  Powerful tools to analyze, optimize, and scale your digital presence
+                </p>
+              </div>
+              
+              <div id="features" className="grid md:grid-cols-3 gap-8">
+                {[
+                  { 
+                    title: 'CRO & A/B Testing', 
+                    desc: 'Experiment with UI and copy to lift conversions with confidence. Run tests that matter.',
+                    color: 'from-violet-600 to-purple-600',
+                    icon: (
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    title: 'SEO & Content', 
+                    desc: 'Generate content, fix technical issues and track search impact with AI-powered insights.',
+                    color: 'from-emerald-600 to-teal-600',
+                    icon: (
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    title: 'Analytics', 
+                    desc: 'Unified tracking insights to understand what drives results and optimize for growth.',
+                    color: 'from-amber-500 to-orange-500',
+                    icon: (
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                      </svg>
+                    )
+                  },
+                ].map((feature) => (
+                  <div key={feature.title} className="group relative rounded-2xl bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-200 border border-slate-200">
+                    <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.color} text-white`}>
+                      {feature.icon}
+                    </div>
+                    <h3 className="mt-6 text-xl font-semibold text-slate-900">{feature.title}</h3>
+                    <p className="mt-2 text-slate-600 leading-7">{feature.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
 
-            {/* CTA */}
-            <section className="mt-16 rounded-2xl bg-slate-900 p-8 sm:p-12 text-white">
-              <div className="grid lg:grid-cols-2 gap-10 items-center">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold">Ready to optimize your online presence?</h2>
-                  <p className="mt-3 text-slate-300">Join Strata today and start with a free account. No credit card required.</p>
-                </div>
-                <div className="flex lg:justify-end">
-                  <Link to="/login" className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100">
+          {/* CTA */}
+          <section className="bg-slate-900">
+            <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  Ready to optimize your online presence?
+                </h2>
+                <p className="mt-4 text-lg text-slate-300">
+                  Join Strata today and start with a free account. No credit card required.
+                </p>
+                <div className="mt-8">
+                  <Link 
+                    to="/login" 
+                    className="inline-flex items-center rounded-lg bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-lg hover:bg-slate-50 hover:shadow-xl transition-all duration-200"
+                  >
                     Create your free account
                   </Link>
                 </div>
               </div>
-            </section>
-          </main>
+            </div>
+          </section>
         </div>
       )}
     </div>
