@@ -15,12 +15,20 @@ import PerformanceCard from './components/PerformanceCard';
 import AlertBanner from './components/AlertBanner';
 import SitesTable from './components/SitesTable';
 import Pagination from './components/Pagination';
+import RecommendationDetail from './components/RecommendationDetail';
 
 interface NavItem {
   id: string;
   label: string;
   icon: string;
   path: string;
+}
+
+interface Recommendation {
+  category: string;
+  issue: string;
+  recommendation: string;
+  guidelines: string[];
 }
 
 const Home: React.FC = () => {
@@ -31,9 +39,99 @@ const Home: React.FC = () => {
   const [activePage, setActivePage] = useState('home');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [currentRecommendation, setCurrentRecommendation] = useState<Recommendation | null>(null);
+  const [currentIssueIndex, setCurrentIssueIndex] = useState(1);
+  const [optimizationProgress, setOptimizationProgress] = useState(0);
+  const [optimizedIssues, setOptimizedIssues] = useState(0);
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Sample recommendation data
+  const recommendations: { [key: string]: Recommendation[] } = {
+    'Technical SEO': [
+      {
+        category: 'Technical SEO',
+        issue: 'Page lacks clear and structured HTML headings (H1, H2, H3), making it hard for both users and search engines to understand the page\'s hierarchy.',
+        recommendation: 'Add a logical heading structure using semantic HTML to break content into scannable sections.',
+        guidelines: [
+          'H1 Page title (used once).',
+          'H2 Main sections of the page.',
+          'H3 Sub-sections or feature details.'
+        ]
+      },
+      {
+        category: 'Technical SEO',
+        issue: 'Missing meta description tag, which is crucial for search engine snippets and click-through rates.',
+        recommendation: 'Add a compelling meta description that accurately describes the page content.',
+        guidelines: [
+          'Keep it between 150-160 characters.',
+          'Include primary keywords naturally.',
+          'Make it compelling and action-oriented.'
+        ]
+      }
+    ],
+    'Content & On-Page SEO': [
+      {
+        category: 'Content & On-Page SEO',
+        issue: 'Page content is too thin with insufficient depth and comprehensive coverage of the topic.',
+        recommendation: 'Expand content to provide comprehensive coverage of the topic with detailed information.',
+        guidelines: [
+          'Aim for at least 1,500 words of quality content.',
+          'Include relevant keywords naturally.',
+          'Add supporting images, videos, or infographics.'
+        ]
+      }
+    ],
+    'Performance & Core Web Vitals': [
+      {
+        category: 'Performance & Core Web Vitals',
+        issue: 'Images are not optimized, causing slow page load times and poor Core Web Vitals scores.',
+        recommendation: 'Optimize all images for web use to improve page load speed.',
+        guidelines: [
+          'Use WebP format when possible.',
+          'Compress images without losing quality.',
+          'Implement lazy loading for images below the fold.'
+        ]
+      }
+    ],
+    'Internal Linking & Site Architecture': [
+      {
+        category: 'Internal Linking & Site Architecture',
+        issue: 'Page lacks internal links to other relevant pages on the website.',
+        recommendation: 'Add relevant internal links to improve site navigation and SEO.',
+        guidelines: [
+          'Link to related content naturally within the text.',
+          'Use descriptive anchor text.',
+          'Create a logical content hierarchy.'
+        ]
+      }
+    ],
+    'Visual UX & Accessibility': [
+      {
+        category: 'Visual UX & Accessibility',
+        issue: 'Poor color contrast ratios making content difficult to read for users with visual impairments.',
+        recommendation: 'Improve color contrast ratios to meet WCAG accessibility guidelines.',
+        guidelines: [
+          'Ensure text contrast ratio is at least 4.5:1.',
+          'Test with color blindness simulators.',
+          'Provide alternative text for images.'
+        ]
+      }
+    ],
+    'Authority & Backlinks': [
+      {
+        category: 'Authority & Backlinks',
+        issue: 'Page lacks external links to authoritative sources, reducing credibility and SEO value.',
+        recommendation: 'Add relevant external links to authoritative sources to build credibility.',
+        guidelines: [
+          'Link to industry experts and authoritative websites.',
+          'Use nofollow for affiliate or sponsored links.',
+          'Ensure links add value to your content.'
+        ]
+      }
+    ]
+  };
 
   // Sample data
   const websites = [
@@ -123,6 +221,12 @@ const Home: React.FC = () => {
 
   const handleViewRecommendation = (title: string) => {
     console.log(`Viewing recommendations for: ${title}`);
+    const categoryRecommendations = recommendations[title];
+    if (categoryRecommendations && categoryRecommendations.length > 0) {
+      setCurrentRecommendation(categoryRecommendations[0]);
+      setCurrentIssueIndex(1);
+      setActivePage('recommendation');
+    }
   };
 
   const handleViewResults = (website: any) => {
@@ -150,6 +254,37 @@ const Home: React.FC = () => {
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
+  };
+
+  const handleAcceptRecommendations = () => {
+    console.log('Accepting recommendations');
+    setOptimizationProgress(100);
+    setOptimizedIssues(optimizedIssues + 1);
+  };
+
+  const handleViewAndEdit = () => {
+    console.log('View and edit recommendations');
+  };
+
+  const handleBackFromRecommendation = () => {
+    setActivePage('project');
+    setCurrentRecommendation(null);
+  };
+
+  const handlePreviousIssue = () => {
+    if (currentRecommendation && currentIssueIndex > 1) {
+      setCurrentIssueIndex(currentIssueIndex - 1);
+    }
+  };
+
+  const handleNextIssue = () => {
+    if (currentRecommendation) {
+      const categoryRecommendations = recommendations[currentRecommendation.category];
+      if (categoryRecommendations && currentIssueIndex < categoryRecommendations.length) {
+        setCurrentIssueIndex(currentIssueIndex + 1);
+        setCurrentRecommendation(categoryRecommendations[currentIssueIndex]);
+      }
+    }
   };
 
   if (loading) {
@@ -208,6 +343,37 @@ const Home: React.FC = () => {
   // Debug: Log current state
   console.log('Current activePage:', activePage);
   console.log('Current user:', currentUser);
+
+  // Recommendation Detail Page
+  if (activePage === 'recommendation' && currentRecommendation) {
+    const categoryRecommendations = recommendations[currentRecommendation.category];
+    const totalIssues = categoryRecommendations ? categoryRecommendations.length : 1;
+    
+    return (
+      <div className="dashboard-layout">
+        <Sidebar 
+          sidebarOpen={sidebarOpen}
+          activePage="project"
+          onNavigation={handleNavigation}
+        />
+        <RecommendationDetail
+          category={currentRecommendation.category}
+          issue={currentRecommendation.issue}
+          recommendation={currentRecommendation.recommendation}
+          guidelines={currentRecommendation.guidelines}
+          onAcceptRecommendations={handleAcceptRecommendations}
+          onViewAndEdit={handleViewAndEdit}
+          onBack={handleBackFromRecommendation}
+          currentIssue={currentIssueIndex}
+          totalIssues={totalIssues}
+          onPrevious={handlePreviousIssue}
+          onNext={handleNextIssue}
+          optimizationProgress={optimizationProgress}
+          optimizedIssues={optimizedIssues}
+        />
+      </div>
+    );
+  }
 
   // Project page component
   const ProjectPage = () => {

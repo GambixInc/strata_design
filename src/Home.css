@@ -1660,3 +1660,342 @@ input:checked + .toggle-slider:before {
     font-size: 0.75rem;
   }
 }
+
+/* Recommendation Detail Page Styles */
+.recommendation-detail-page {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.recommendation-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recommendation-header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.recommendation-title h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.recommendation-title p {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.recommendation-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.recommendation-content {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Recommendation Card */
+.recommendation-card {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.recommendation-card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.issue-navigation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-btn {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #475569;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #9ca3af;
+  color: #1e293b;
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-btn i {
+  font-size: 0.875rem;
+}
+
+.issue-counter {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Recommendation Sections */
+.recommendation-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.issue-section,
+.recommendation-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.issue-section h3,
+.recommendation-section h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.issue-section p,
+.recommendation-section p {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.guidelines ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.guidelines li {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.guidelines li:last-child {
+  margin-bottom: 0;
+}
+
+/* Action Buttons */
+.recommendation-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.action-btn.primary {
+  background: #7c3aed;
+  color: #ffffff;
+  border-color: #7c3aed;
+}
+
+.action-btn.primary:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+  transform: translateY(-1px);
+}
+
+.action-btn.secondary {
+  background: #ffffff;
+  color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.action-btn.secondary:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+/* Optimization Status */
+.optimization-status {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.optimization-progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.optimization-progress .progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.optimization-progress .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.optimization-summary {
+  display: flex;
+  justify-content: center;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card i {
+  color: #7c3aed;
+  font-size: 1rem;
+}
+
+.summary-card span {
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Responsive Design for Recommendation Detail */
+@media (max-width: 768px) {
+  .recommendation-header {
+    padding: 20px 24px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .recommendation-header-left {
+    justify-content: space-between;
+  }
+  
+  .recommendation-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .recommendation-content {
+    padding: 24px;
+  }
+  
+  .recommendation-card {
+    padding: 24px;
+  }
+  
+  .recommendation-card-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .issue-navigation {
+    justify-content: center;
+  }
+  
+  .recommendation-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .optimization-progress {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .progress-text {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .recommendation-header {
+    padding: 16px 20px;
+  }
+  
+  .recommendation-content {
+    padding: 20px;
+  }
+  
+  .recommendation-card {
+    padding: 20px;
+  }
+  
+  .issue-section,
+  .recommendation-section {
+    padding: 20px;
+  }
+  
+  .summary-card {
+    padding: 12px 16px;
+  }
+}
