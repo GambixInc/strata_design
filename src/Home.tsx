@@ -468,16 +468,31 @@ const Home: React.FC = () => {
         {/* Header */}
         <header className="main-header">
           <div className="header-left">
-            <h1 className="welcome-text">Welcome back, {currentUser.name}</h1>
+            <div className="welcome-section">
+              <h1 className="welcome-text">Welcome back, {currentUser.name}</h1>
+              <p className="welcome-subtitle">Here's what's happening with your projects today.</p>
+            </div>
           </div>
           <div className="header-right">
-            <div className="user-profile">
-              <img 
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
-                alt="Profile" 
-                className="profile-image"
-              />
-              <span className="profile-name">{currentUser.name}</span>
+            <div className="header-actions">
+              <button className="notification-btn" aria-label="Notifications">
+                <i className="fas fa-bell"></i>
+                <span className="notification-badge">3</span>
+              </button>
+              <div className="user-profile">
+                <div className="profile-info">
+                  <span className="profile-name">{currentUser.name}</span>
+                  <span className="profile-role">{currentUser.role}</span>
+                </div>
+                <img 
+                  src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face" 
+                  alt="Profile" 
+                  className="profile-image"
+                />
+                <button className="profile-dropdown" aria-label="Profile menu">
+                  <i className="fas fa-chevron-down"></i>
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -495,6 +510,7 @@ const Home: React.FC = () => {
               />
             </div>
             <button className="new-project-btn">
+              <i className="fas fa-plus"></i>
               New Project
             </button>
           </div>
@@ -502,6 +518,9 @@ const Home: React.FC = () => {
           {/* Alert Banner */}
           <div className="alert-banner">
             <div className="alert-content">
+              <div className="alert-icon">
+                <i className="fas fa-exclamation-triangle"></i>
+              </div>
               <div className="alert-text">
                 <h3 className="alert-title">Low Site Health</h3>
                 <p className="alert-description">art.ai has a site health of only 68%. Please view recommendations now.</p>
@@ -512,6 +531,19 @@ const Home: React.FC = () => {
 
           {/* Sites Table */}
           <div className="sites-table-container">
+            <div className="table-header">
+              <h2 className="table-title">Your Websites</h2>
+              <div className="table-actions">
+                <button className="table-action-btn">
+                  <i className="fas fa-filter"></i>
+                  Filter
+                </button>
+                <button className="table-action-btn">
+                  <i className="fas fa-download"></i>
+                  Export
+                </button>
+              </div>
+            </div>
             <table className="sites-table">
               <thead>
                 <tr>
@@ -524,7 +556,17 @@ const Home: React.FC = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>https://www.inthebox.io</td>
+                  <td>
+                    <div className="website-info">
+                      <div className="website-icon">
+                        <i className="fas fa-globe"></i>
+                      </div>
+                      <div className="website-details">
+                        <span className="website-url">https://www.inthebox.io</span>
+                        <span className="website-status">Active</span>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <div className="health-score">
                       <span className="score">80%</span>
@@ -533,7 +575,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   </td>
-                  <td>17</td>
+                  <td>
+                    <span className="recommendations-count">17</span>
+                  </td>
                   <td>
                     <label className="toggle-switch">
                       <input type="checkbox" />
@@ -543,17 +587,27 @@ const Home: React.FC = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn view-btn">View Results</button>
-                      <button className="action-btn delete-btn">
+                      <button className="action-btn delete-btn" title="Delete">
                         <i className="fas fa-trash"></i>
                       </button>
-                      <button className="action-btn edit-btn">
+                      <button className="action-btn edit-btn" title="Edit">
                         <i className="fas fa-pencil-alt"></i>
                       </button>
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>https://www.shop.sneakerspa.ng/</td>
+                  <td>
+                    <div className="website-info">
+                      <div className="website-icon">
+                        <i className="fas fa-shopping-cart"></i>
+                      </div>
+                      <div className="website-details">
+                        <span className="website-url">https://www.shop.sneakerspa.ng/</span>
+                        <span className="website-status">Active</span>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <div className="health-score">
                       <span className="score">76%</span>
@@ -562,7 +616,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   </td>
-                  <td>7</td>
+                  <td>
+                    <span className="recommendations-count">7</span>
+                  </td>
                   <td>
                     <label className="toggle-switch">
                       <input type="checkbox" />
@@ -572,17 +628,27 @@ const Home: React.FC = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn view-btn">View Results</button>
-                      <button className="action-btn delete-btn">
+                      <button className="action-btn delete-btn" title="Delete">
                         <i className="fas fa-trash"></i>
                       </button>
-                      <button className="action-btn edit-btn">
+                      <button className="action-btn edit-btn" title="Edit">
                         <i className="fas fa-pencil-alt"></i>
                       </button>
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>https://www.meditationoasis.com</td>
+                  <td>
+                    <div className="website-info">
+                      <div className="website-icon">
+                        <i className="fas fa-leaf"></i>
+                      </div>
+                      <div className="website-details">
+                        <span className="website-url">https://www.meditationoasis.com</span>
+                        <span className="website-status">Active</span>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <div className="health-score">
                       <span className="score">96%</span>
@@ -591,7 +657,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   </td>
-                  <td>3</td>
+                  <td>
+                    <span className="recommendations-count">3</span>
+                  </td>
                   <td>
                     <label className="toggle-switch">
                       <input type="checkbox" />
@@ -601,26 +669,38 @@ const Home: React.FC = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn view-btn">View Results</button>
-                      <button className="action-btn delete-btn">
+                      <button className="action-btn delete-btn" title="Delete">
                         <i className="fas fa-trash"></i>
                       </button>
-                      <button className="action-btn edit-btn">
+                      <button className="action-btn edit-btn" title="Edit">
                         <i className="fas fa-pencil-alt"></i>
                       </button>
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>https://www.art.ai</td>
                   <td>
-                    <div className="health-score">
-                      <span className="score">68%</span>
-                      <div className="health-bar">
-                        <div className="health-fill" style={{width: '68%'}}></div>
+                    <div className="website-info">
+                      <div className="website-icon">
+                        <i className="fas fa-palette"></i>
+                      </div>
+                      <div className="website-details">
+                        <span className="website-url">https://www.art.ai</span>
+                        <span className="website-status status-warning">Needs Attention</span>
                       </div>
                     </div>
                   </td>
-                  <td>74</td>
+                  <td>
+                    <div className="health-score">
+                      <span className="score score-warning">68%</span>
+                      <div className="health-bar">
+                        <div className="health-fill health-fill-warning" style={{width: '68%'}}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="recommendations-count recommendations-warning">74</span>
+                  </td>
                   <td>
                     <label className="toggle-switch">
                       <input type="checkbox" />
@@ -630,10 +710,10 @@ const Home: React.FC = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn view-btn">View Results</button>
-                      <button className="action-btn delete-btn">
+                      <button className="action-btn delete-btn" title="Delete">
                         <i className="fas fa-trash"></i>
                       </button>
-                      <button className="action-btn edit-btn">
+                      <button className="action-btn edit-btn" title="Edit">
                         <i className="fas fa-pencil-alt"></i>
                       </button>
                     </div>
@@ -645,9 +725,18 @@ const Home: React.FC = () => {
 
           {/* Pagination */}
           <div className="pagination">
-            <button className="pagination-btn">Previous</button>
-            <span className="pagination-info">Page 1 of 1</span>
-            <button className="pagination-btn">Next</button>
+            <button className="pagination-btn" disabled>
+              <i className="fas fa-chevron-left"></i>
+              Previous
+            </button>
+            <div className="pagination-info">
+              <span>Page 1 of 1</span>
+              <span className="pagination-details">Showing 4 of 4 results</span>
+            </div>
+            <button className="pagination-btn" disabled>
+              Next
+              <i className="fas fa-chevron-right"></i>
+            </button>
           </div>
         </div>
       </main>
