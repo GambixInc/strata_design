@@ -1,13 +1,29 @@
+/* Global Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
 /* Dashboard Layout */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
   background-color: #f8fafc;
+  width: 100%;
+  position: relative;
 }
 
 /* Sidebar */
 .sidebar {
   width: 280px;
+  min-width: 280px;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
   display: flex;
@@ -16,6 +32,9 @@
   position: fixed;
   height: 100vh;
   z-index: 1000;
+  left: 0;
+  top: 0;
+  flex-shrink: 0;
 }
 
 .sidebar-closed {
@@ -186,10 +205,16 @@
   flex: 1;
   margin-left: 280px;
   transition: margin-left 0.3s ease;
+  min-width: 0;
+  width: calc(100vw - 280px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-closed + .main-content {
   margin-left: 80px;
+  width: calc(100vw - 80px);
 }
 
 /* Header */
@@ -200,6 +225,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -217,12 +244,18 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .welcome-subtitle {
   font-size: 0.875rem;
   color: #64748b;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-right {
@@ -324,6 +357,10 @@
 /* Dashboard Content */
 .dashboard-content {
   padding: 32px;
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Search Section */
@@ -332,12 +369,17 @@
   gap: 16px;
   margin-bottom: 24px;
   align-items: center;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  min-width: 0; /* Allow section to shrink */
+  width: 100%;
+  max-width: 100%;
 }
 
 .search-container {
   flex: 1;
   position: relative;
   max-width: 400px;
+  min-width: 200px; /* Ensure minimum width */
 }
 
 .search-icon {
@@ -400,6 +442,9 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .alert-banner::before {
@@ -648,6 +693,71 @@
 
 .alert-banner.alert-error::before {
   background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+/* Main Layout Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80px;
+    min-width: 80px;
+  }
+  
+  .main-content {
+    margin-left: 80px;
+    width: calc(100vw - 80px);
+  }
+  
+  .recommendation-content {
+    padding: 20px;
+    max-width: none;
+  }
+  
+  .recommendation-card {
+    padding: 20px;
+  }
+  
+  .issue-section,
+  .recommendation-section {
+    padding: 16px;
+  }
+  
+  .main-header {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .header-left {
+    order: 2;
+  }
+  
+  .header-right {
+    order: 1;
+    justify-content: flex-end;
+  }
+  
+  .welcome-text {
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .search-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-container {
+    max-width: none;
+  }
+  
+  .new-project-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Alert Banner Responsive */
@@ -1665,6 +1775,9 @@ input:checked + .toggle-slider:before {
 .recommendation-detail-page {
   min-height: 100vh;
   background: #f8fafc;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .recommendation-header {
@@ -1674,6 +1787,8 @@ input:checked + .toggle-slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .recommendation-header-left {
@@ -1702,8 +1817,12 @@ input:checked + .toggle-slider:before {
 
 .recommendation-content {
   padding: 32px;
+  flex: 1;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Recommendation Card */
@@ -1713,6 +1832,8 @@ input:checked + .toggle-slider:before {
   padding: 32px;
   margin-bottom: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .recommendation-card-header {
@@ -1787,6 +1908,8 @@ input:checked + .toggle-slider:before {
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .issue-section h3,
@@ -1803,6 +1926,8 @@ input:checked + .toggle-slider:before {
   color: #475569;
   line-height: 1.6;
   margin: 0 0 16px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .guidelines ul {
@@ -1815,6 +1940,8 @@ input:checked + .toggle-slider:before {
   color: #475569;
   line-height: 1.6;
   margin-bottom: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .guidelines li:last-child {
@@ -1893,7 +2020,8 @@ input:checked + .toggle-slider:before {
   font-size: 0.875rem;
   color: #64748b;
   font-weight: 500;
-  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .optimization-summary {
