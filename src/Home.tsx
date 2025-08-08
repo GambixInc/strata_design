@@ -287,6 +287,10 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -355,6 +359,7 @@ const Home: React.FC = () => {
           sidebarOpen={sidebarOpen}
           activePage="project"
           onNavigation={handleNavigation}
+          onToggleSidebar={handleToggleSidebar}
         />
         <div className="main-content">
           <RecommendationDetail
@@ -457,6 +462,7 @@ const Home: React.FC = () => {
         sidebarOpen={sidebarOpen}
         activePage={activePage}
         onNavigation={handleNavigation}
+        onToggleSidebar={handleToggleSidebar}
       />
 
       {/* Main Content */}

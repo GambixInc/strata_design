@@ -12,9 +12,10 @@ interface SidebarProps {
   sidebarOpen: boolean;
   activePage: string;
   onNavigation: (navItem: NavItem) => void;
+  onToggleSidebar: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, activePage, onNavigation }) => {
+const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, activePage, onNavigation, onToggleSidebar }) => {
   const navigate = useNavigate();
 
   const navigationItems: NavItem[] = [
@@ -47,6 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, activePage, onNavigation
           </div>
           {sidebarOpen && <h1 className="sidebar-brand">Gambix Strata</h1>}
         </div>
+        <button className="sidebar-toggle" onClick={onToggleSidebar}>
+          <i className={`fas fa-${sidebarOpen ? 'chevron-left' : 'chevron-right'}`}></i>
+        </button>
       </div>
 
             {/* Navigation */}
