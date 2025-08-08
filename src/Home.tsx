@@ -1,7 +1,7 @@
 // src/Home.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 // Import components
@@ -34,7 +34,7 @@ interface Recommendation {
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('home');
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,9 +43,6 @@ const Home: React.FC = () => {
   const [currentIssueIndex, setCurrentIssueIndex] = useState(1);
   const [optimizationProgress, setOptimizationProgress] = useState(0);
   const [optimizedIssues, setOptimizedIssues] = useState(0);
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   // Sample recommendation data
   const recommendations: { [key: string]: Recommendation[] } = {
