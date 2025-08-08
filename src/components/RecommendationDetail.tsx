@@ -1,4 +1,5 @@
 import React from 'react';
+import './RecommendationDetail.css';
 
 interface RecommendationDetailProps {
   category: string;

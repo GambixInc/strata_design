@@ -356,21 +356,23 @@ const Home: React.FC = () => {
           activePage="project"
           onNavigation={handleNavigation}
         />
-        <RecommendationDetail
-          category={currentRecommendation.category}
-          issue={currentRecommendation.issue}
-          recommendation={currentRecommendation.recommendation}
-          guidelines={currentRecommendation.guidelines}
-          onAcceptRecommendations={handleAcceptRecommendations}
-          onViewAndEdit={handleViewAndEdit}
-          onBack={handleBackFromRecommendation}
-          currentIssue={currentIssueIndex}
-          totalIssues={totalIssues}
-          onPrevious={handlePreviousIssue}
-          onNext={handleNextIssue}
-          optimizationProgress={optimizationProgress}
-          optimizedIssues={optimizedIssues}
-        />
+        <div className="main-content">
+          <RecommendationDetail
+            category={currentRecommendation.category}
+            issue={currentRecommendation.issue}
+            recommendation={currentRecommendation.recommendation}
+            guidelines={currentRecommendation.guidelines}
+            onAcceptRecommendations={handleAcceptRecommendations}
+            onViewAndEdit={handleViewAndEdit}
+            onBack={handleBackFromRecommendation}
+            currentIssue={currentIssueIndex}
+            totalIssues={totalIssues}
+            onPrevious={handlePreviousIssue}
+            onNext={handleNextIssue}
+            optimizationProgress={optimizationProgress}
+            optimizedIssues={optimizedIssues}
+          />
+        </div>
       </div>
     );
   }

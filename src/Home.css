@@ -210,6 +210,7 @@ html, body {
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .sidebar-closed + .main-content {
@@ -1823,6 +1824,7 @@ input:checked + .toggle-slider:before {
   margin: 0 auto;
   overflow-y: auto;
   overflow-x: hidden;
+  min-width: 0;
 }
 
 /* Recommendation Card */
@@ -1834,6 +1836,8 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .recommendation-card-header {
@@ -1848,6 +1852,8 @@ input:checked + .toggle-slider:before {
   font-weight: 700;
   color: #1e293b;
   margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .issue-navigation {
@@ -1900,6 +1906,8 @@ input:checked + .toggle-slider:before {
   flex-direction: column;
   gap: 24px;
   margin-bottom: 32px;
+  width: 100%;
+  min-width: 0;
 }
 
 .issue-section,
@@ -1910,6 +1918,8 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .issue-section h3,
@@ -1918,6 +1928,8 @@ input:checked + .toggle-slider:before {
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 16px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .issue-section p,
@@ -2070,10 +2082,12 @@ input:checked + .toggle-slider:before {
   
   .recommendation-content {
     padding: 24px;
+    width: 100%;
   }
   
   .recommendation-card {
     padding: 24px;
+    width: 100%;
   }
   
   .recommendation-card-header {
@@ -2112,15 +2126,18 @@ input:checked + .toggle-slider:before {
   
   .recommendation-content {
     padding: 20px;
+    width: 100%;
   }
   
   .recommendation-card {
     padding: 20px;
+    width: 100%;
   }
   
   .issue-section,
   .recommendation-section {
     padding: 20px;
+    width: 100%;
   }
   
   .summary-card {
