@@ -231,20 +231,20 @@ const Home: React.FC = () => {
 
   // If user is not logged in, show the marketing page
   if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
-        <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
-              <span>Strata</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
+      <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
+            <span>Strata</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
               <Link to="/login" className="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">Login</Link>
             </div>
-          </div>
-        </nav>
+        </div>
+      </nav>
 
         {/* Guest user marketing page content */}
         <div>
@@ -741,18 +741,36 @@ const Home: React.FC = () => {
 
           {/* Pagination */}
           <div className="pagination">
-            <button className="pagination-btn" disabled>
-              <i className="fas fa-chevron-left"></i>
-              Previous
-            </button>
-            <div className="pagination-info">
-              <span>Page 1 of 1</span>
-              <span className="pagination-details">Showing 4 of 4 results</span>
+            <div className="pagination-left">
+              <span className="pagination-summary">Showing 1-4 of 4 results</span>
             </div>
-            <button className="pagination-btn" disabled>
-              Next
-              <i className="fas fa-chevron-right"></i>
-            </button>
+            
+            <div className="pagination-center">
+              <button className="pagination-btn" disabled>
+                <i className="fas fa-chevron-left"></i>
+              </button>
+              
+              <div className="page-numbers">
+                <button className="page-number active">1</button>
+              </div>
+              
+              <button className="pagination-btn" disabled>
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            </div>
+            
+            <div className="pagination-right">
+              <div className="page-size-selector">
+                <span className="page-size-label">Show:</span>
+                <select className="page-size-select">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span className="page-size-suffix">per page</span>
+              </div>
+            </div>
           </div>
         </div>
       </main>
