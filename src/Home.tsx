@@ -198,7 +198,7 @@ const Home: React.FC = () => {
             <span>Strata</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link to="/scraper" className="text-sm font-medium text-slate-600 hover:text-slate-900">Web Scraper</Link>
+            {/* <Link to="/scraper" className="text-sm font-medium text-slate-600 hover:text-slate-900">Web Scraper</Link> */}
             <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
             {currentUser ? (
               <button onClick={handleLogout} className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">Logout</button>
