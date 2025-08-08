@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Home.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -50,10 +50,20 @@ interface AnalyticsReport {
   };
 }
 
+// Navigation item interface
+interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+  path: string;
+  badge?: number;
+}
+
 const API_BASE = 'http://localhost:8080/api';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sites, setSites] = useState<string[]>([]);
   const [selectedSite, setSelectedSite] = useState<string>('');
@@ -62,7 +72,20 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activePage, setActivePage] = useState('home');
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
+
+  // Navigation items
+  const navigationItems: NavItem[] = [
+    { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
+    { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
+    { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
+  ];
+
+  const bottomNavItems: NavItem[] = [
+    { id: 'support', label: 'Support', icon: 'fas fa-globe', path: '/support' },
+    { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
+  ];
 
   useEffect(() => {
     const user = localStorage.getItem('currentUser');
@@ -77,6 +100,15 @@ const Home: React.FC = () => {
       fetchSites();
     }
   }, [currentUser]);
+
+  // Set active page based on current location
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const currentNavItem = navigationItems.find(item => item.path === currentPath);
+    if (currentNavItem) {
+      setActivePage(currentNavItem.id);
+    }
+  }, [location.pathname]);
 
   const fetchSites = async () => {
     setLoading(true);
@@ -143,6 +175,13 @@ const Home: React.FC = () => {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     navigate('/');
+  };
+
+  const handleNavigation = (navItem: NavItem) => {
+    setActivePage(navItem.id);
+    if (navItem.path !== location.pathname) {
+      navigate(navItem.path);
+    }
   };
 
   const renderSeoChart = () => {
@@ -370,10 +409,16 @@ const Home: React.FC = () => {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="sidebar-header">
-          <h2 className="sidebar-brand">Gambix Strata</h2>
+          <div className="sidebar-brand-container">
+            <div className="sidebar-logo">
+              <span className="logo-icon">G</span>
+            </div>
+            <h2 className="sidebar-brand">Gambix Strata</h2>
+          </div>
           <button 
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
             <i className="fas fa-bars"></i>
           </button>
@@ -381,28 +426,38 @@ const Home: React.FC = () => {
         
         <nav className="sidebar-nav">
           <div className="nav-section">
-            <button className="nav-item nav-item-active">
-              <i className="fas fa-home"></i>
-              <span>Home</span>
-            </button>
-            <button className="nav-item">
-              <i className="fas fa-folder"></i>
-              <span>Project</span>
-            </button>
-            <button className="nav-item">
-              <i className="fas fa-users"></i>
-              <span>Team</span>
-            </button>
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
+                onClick={() => handleNavigation(item)}
+              >
+                <i className={item.icon}></i>
+                <span className="nav-label">{item.label}</span>
+                {item.badge && (
+                  <span className="nav-badge">{item.badge}</span>
+                )}
+              </button>
+            ))}
           </div>
           
           <div className="nav-section nav-section-bottom">
-            <button className="nav-item">
-              <i className="fas fa-globe"></i>
-              <span>Support</span>
-            </button>
-            <button className="nav-item">
-              <i className="fas fa-cog"></i>
-              <span>Settings</span>
+            {bottomNavItems.map((item) => (
+              <button
+                key={item.id}
+                className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
+                onClick={() => handleNavigation(item)}
+              >
+                <i className={item.icon}></i>
+                <span className="nav-label">{item.label}</span>
+                {item.badge && (
+                  <span className="nav-badge">{item.badge}</span>
+                )}
+              </button>
+            ))}
+            <button className="nav-item nav-item-logout" onClick={handleLogout}>
+              <i className="fas fa-sign-out-alt"></i>
+              <span className="nav-label">Logout</span>
             </button>
           </div>
         </nav>
