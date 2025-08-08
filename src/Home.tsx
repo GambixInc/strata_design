@@ -61,6 +61,7 @@ const Home: React.FC = () => {
   const [analyticsReport, setAnalyticsReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
 
   useEffect(() => {
@@ -189,130 +190,24 @@ const Home: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
-      <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
-            <span>Strata</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            {/* <Link to="/scraper" className="text-sm font-medium text-slate-600 hover:text-slate-900">Web Scraper</Link> */}
-            <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
-            {currentUser ? (
-              <button onClick={handleLogout} className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">Logout</button>
-            ) : (
+  // If user is not logged in, show the marketing page
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
+        <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
+              <span>Strata</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
               <Link to="/login" className="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">Login</Link>
-            )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {currentUser ? (
-        // Logged-in user dashboard
-        <div className="dashboard-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8">
-           <div className="header">
-                <h1><i className="fas fa-chart-line"></i> Welcome, {currentUser.name}</h1>
-                <p>Comprehensive analysis and insights for your scraped websites</p>
-            </div>
-          {sites.length > 0 ? (
-            <div className="site-selector">
-              <label htmlFor="siteSelect"><strong>Select Scraped Site:</strong></label>
-              <select id="siteSelect" value={selectedSite} onChange={handleSiteChange}>
-                <option value="">Choose a site to analyze...</option>
-                {sites.map(site => (
-                  <option key={site} value={site}>{site}</option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className="no-sites-message">
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)' }}>
-                    <i className="fas fa-info-circle"></i>
-                  </div>
-                  <div className="card-title">No Sites Available</div>
-                </div>
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '20px' }}>
-                    No scraped sites found for your account.
-                  </p>
-                  <p style={{ color: '#888', marginBottom: '30px' }}>
-                    To see analytics and SEO insights, you need to scrape some websites first.
-                  </p>
-                  <Link to="/scraper" className="cta-button" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                    <i className="fas fa-spider"></i> Start Scraping Websites
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {selectedSite && (
-            <div className="dashboard-grid">
-              {loading && (
-                <div className="loading full-width">
-                  <i className="fas fa-spinner fa-spin"></i>
-                  <p>Loading reports...</p>
-                </div>
-              )}
-              {error && <div className="error full-width">{error}</div>}
-
-              {analysisReport && (
-                <>
-                  <div className="card">
-                    <div className="card-header">
-                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
-                        <i className="fas fa-search"></i>
-                      </div>
-                      <div className="card-title">SEO Overview</div>
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="card-header">
-                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)' }}>
-                        <i className="fas fa-tachometer-alt"></i>
-                      </div>
-                      <div className="card-title">Performance Metrics</div>
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="card-header">
-                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)' }}>
-                        <i className="fas fa-file-alt"></i>
-                      </div>
-                      <div className="card-title">Content Analysis</div>
-                    </div>
-                  </div>
-                  <div className="card full-width">
-                    <div className="card-header">
-                      <div className="card-icon" style={{ background: 'linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)' }}>
-                        <i className="fas fa-chart-pie"></i>
-                      </div>
-                      <div className="card-title">SEO Score Breakdown</div>
-                    </div>
-                    {renderSeoChart()}
-                  </div>
-                </>
-              )}
-
-              {analyticsReport && (
-                <div className="card">
-                  <div className="card-header">
-                    <div className="card-icon" style={{ background: 'linear-gradient(135deg, #dc3545 0%, #e83e8c 100%)' }}>
-                      <i className="fas fa-chart-bar"></i>
-                    </div>
-                    <div className="card-title">Analytics Tracking</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        // Guest user marketing page styled with Tailwind
+        {/* Guest user marketing page content */}
         <div>
           {/* HERO */}
           <header className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
@@ -465,7 +360,242 @@ const Home: React.FC = () => {
             </div>
           </section>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // Logged-in user dashboard with new layout
+  return (
+    <div className="dashboard-layout">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <div className="sidebar-header">
+          <h2 className="sidebar-brand">Gambix Strata</h2>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+        </div>
+        
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <button className="nav-item nav-item-active">
+              <i className="fas fa-home"></i>
+              <span>Home</span>
+            </button>
+            <button className="nav-item">
+              <i className="fas fa-folder"></i>
+              <span>Project</span>
+            </button>
+            <button className="nav-item">
+              <i className="fas fa-users"></i>
+              <span>Team</span>
+            </button>
+          </div>
+          
+          <div className="nav-section nav-section-bottom">
+            <button className="nav-item">
+              <i className="fas fa-globe"></i>
+              <span>Support</span>
+            </button>
+            <button className="nav-item">
+              <i className="fas fa-cog"></i>
+              <span>Settings</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Header */}
+        <header className="main-header">
+          <div className="header-left">
+            <h1 className="welcome-text">Welcome back, {currentUser.name}</h1>
+          </div>
+          <div className="header-right">
+            <div className="user-profile">
+              <img 
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
+                alt="Profile" 
+                className="profile-image"
+              />
+              <span className="profile-name">{currentUser.name}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Dashboard Content */}
+        <div className="dashboard-content">
+          {/* Search and New Project Section */}
+          <div className="search-section">
+            <div className="search-container">
+              <i className="fas fa-search search-icon"></i>
+              <input 
+                type="text" 
+                placeholder="Enter URL or Keyword" 
+                className="search-input"
+              />
+            </div>
+            <button className="new-project-btn">
+              New Project
+            </button>
+          </div>
+
+          {/* Alert Banner */}
+          <div className="alert-banner">
+            <div className="alert-content">
+              <div className="alert-text">
+                <h3 className="alert-title">Low Site Health</h3>
+                <p className="alert-description">art.ai has a site health of only 68%. Please view recommendations now.</p>
+              </div>
+              <button className="alert-btn">View Results</button>
+            </div>
+          </div>
+
+          {/* Sites Table */}
+          <div className="sites-table-container">
+            <table className="sites-table">
+              <thead>
+                <tr>
+                  <th>Website</th>
+                  <th>Site Health</th>
+                  <th>Recommendations</th>
+                  <th>Auto-Optimize</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>https://www.inthebox.io</td>
+                  <td>
+                    <div className="health-score">
+                      <span className="score">80%</span>
+                      <div className="health-bar">
+                        <div className="health-fill" style={{width: '80%'}}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>17</td>
+                  <td>
+                    <label className="toggle-switch">
+                      <input type="checkbox" />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button className="action-btn view-btn">View Results</button>
+                      <button className="action-btn delete-btn">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                      <button className="action-btn edit-btn">
+                        <i className="fas fa-pencil-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>https://www.shop.sneakerspa.ng/</td>
+                  <td>
+                    <div className="health-score">
+                      <span className="score">76%</span>
+                      <div className="health-bar">
+                        <div className="health-fill" style={{width: '76%'}}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>7</td>
+                  <td>
+                    <label className="toggle-switch">
+                      <input type="checkbox" />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button className="action-btn view-btn">View Results</button>
+                      <button className="action-btn delete-btn">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                      <button className="action-btn edit-btn">
+                        <i className="fas fa-pencil-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>https://www.meditationoasis.com</td>
+                  <td>
+                    <div className="health-score">
+                      <span className="score">96%</span>
+                      <div className="health-bar">
+                        <div className="health-fill" style={{width: '96%'}}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>3</td>
+                  <td>
+                    <label className="toggle-switch">
+                      <input type="checkbox" />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button className="action-btn view-btn">View Results</button>
+                      <button className="action-btn delete-btn">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                      <button className="action-btn edit-btn">
+                        <i className="fas fa-pencil-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>https://www.art.ai</td>
+                  <td>
+                    <div className="health-score">
+                      <span className="score">68%</span>
+                      <div className="health-bar">
+                        <div className="health-fill" style={{width: '68%'}}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>74</td>
+                  <td>
+                    <label className="toggle-switch">
+                      <input type="checkbox" />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button className="action-btn view-btn">View Results</button>
+                      <button className="action-btn delete-btn">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                      <button className="action-btn edit-btn">
+                        <i className="fas fa-pencil-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="pagination">
+            <button className="pagination-btn">Previous</button>
+            <span className="pagination-info">Page 1 of 1</span>
+            <button className="pagination-btn">Next</button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
