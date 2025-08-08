@@ -1,79 +1,84 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import './Sidebar.css';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-interface SidebarProps {
-  userName?: string;
-  userEmail?: string;
-  userAvatar?: string;
-  onLogout?: () => void;
+interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+  path: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  userName = 'Olivia Rhye',
-  userEmail = 'olivia@strata.com',
-  userAvatar = 'https://via.placeholder.com/40',
-  onLogout
-}) => {
-  const location = useLocation();
+interface SidebarProps {
+  sidebarOpen: boolean;
+  activePage: string;
+  onNavigation: (navItem: NavItem) => void;
+}
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
+const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, activePage, onNavigation }) => {
+  const navigate = useNavigate();
+
+  const navigationItems: NavItem[] = [
+    { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
+    { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
+    { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
+  ];
+
+  const bottomNavItems: NavItem[] = [
+    { id: 'support', label: 'Support', icon: 'fas fa-headset', path: '/support' },
+    { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
+  ];
+
+  const handleLogout = async () => {
+    try {
+      // Mock logout - just navigate to login
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
   return (
-    <aside className="dashboard-sidebar">
-      <div className="sidebar-header">
-        <h2 className="logo">Strata</h2>
-      </div>
-      <nav className="sidebar-nav">
-        <ul>
-          <li>
-            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-              <i className="fas fa-home"></i> Home
-            </Link>
-          </li>
-          {/* <li>
-            <Link to="/project" className={location.pathname === '/project' ? 'active' : ''}>
-              <i className="fas fa-folder"></i> Project
-            </Link>
-          </li> */}
-          {/* <li>
-            <Link to="/team" className={location.pathname === '/team' ? 'active' : ''}>
-              <i className="fas fa-users"></i> Team
-            </Link>
-          </li> */}
-          <li>
-            <Link to="/account" className={location.pathname === '/account' ? 'active' : ''}>
-              <i className="fas fa-user-circle"></i> Account
-            </Link>
-          </li>
-        </ul>
-        <ul className="sidebar-bottom-nav">
-          {/* <li>
-            <Link to="/support" className={location.pathname === '/support' ? 'active' : ''}>
-              <i className="fas fa-life-ring"></i> Support
-            </Link>
-          </li> */}
-          {/* <li>
-            <Link to="/settings" className={location.pathname === '/settings' ? 'active' : ''}>
-              <i className="fas fa-cog"></i> Settings
-            </Link>
-          </li> */}
-        </ul>
-      </nav>
-      <div className="sidebar-profile">
-        <img src={userAvatar} alt="User Avatar" className="profile-avatar" />
-        <div className="profile-info">
-          <div className="profile-name">{userName}</div>
-          <div className="profile-email">{userEmail}</div>
+    <aside className={`sidebar ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
+      {/* Brand */}
+      <div className="sidebar-brand-container">
+        <div className="sidebar-logo">
+          <span className="logo-icon">G</span>
         </div>
-        <button className="logout-button" onClick={handleLogout}>
-          <i className="fas fa-sign-out-alt"></i>
-        </button>
+        {sidebarOpen && <h1 className="sidebar-brand">Gambix Strata</h1>}
       </div>
+
+      {/* Navigation */}
+      <nav className="nav-section">
+        {navigationItems.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
+            onClick={() => onNavigation(item)}
+          >
+            <i className={item.icon}></i>
+            {sidebarOpen && <span className="nav-label">{item.label}</span>}
+          </button>
+        ))}
+      </nav>
+
+      {/* Bottom Navigation */}
+      <nav className="nav-section-bottom">
+        {bottomNavItems.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
+            onClick={() => onNavigation(item)}
+          >
+            <i className={item.icon}></i>
+            {sidebarOpen && <span className="nav-label">{item.label}</span>}
+          </button>
+        ))}
+        
+        <button className="nav-item nav-item-logout" onClick={handleLogout}>
+          <i className="fas fa-sign-out-alt"></i>
+          {sidebarOpen && <span className="nav-label">Logout</span>}
+        </button>
+      </nav>
     </aside>
   );
 };
