@@ -440,23 +440,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="dashboard-layout">
-      {/* Debug info - remove this later */}
-      <div style={{ 
-        position: 'fixed', 
-        top: '10px', 
-        right: '10px', 
-        background: 'rgba(0,0,0,0.8)', 
-        color: 'white', 
-        padding: '10px', 
-        borderRadius: '5px', 
-        zIndex: 9999,
-        fontSize: '12px'
-      }}>
-        Active Page: {activePage}
-        <br />
-        <button onClick={() => setActivePage('home')} style={{ marginRight: '5px' }}>Home</button>
-        <button onClick={() => setActivePage('project')}>Project</button>
-      </div>
+
 
       <Sidebar 
         sidebarOpen={sidebarOpen}
