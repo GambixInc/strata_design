@@ -524,8 +524,24 @@ const Home: React.FC = () => {
               <div className="alert-text">
                 <h3 className="alert-title">Low Site Health</h3>
                 <p className="alert-description">art.ai has a site health of only 68%. Please view recommendations now.</p>
+                <div className="alert-meta">
+                  <span className="alert-time">2 hours ago</span>
+                  <span className="alert-priority">High Priority</span>
+                </div>
               </div>
-              <button className="alert-btn">View Results</button>
+              <div className="alert-actions">
+                <button className="alert-btn primary">View Results</button>
+                <button className="alert-btn secondary">Dismiss</button>
+                <button className="alert-dismiss" aria-label="Close alert">
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div className="alert-progress">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{width: '68%'}}></div>
+              </div>
+              <span className="progress-text">68% Site Health</span>
             </div>
           </div>
 
