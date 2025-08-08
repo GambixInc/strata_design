@@ -8,7 +8,7 @@ import { useRedirectIfSignedIn } from './hooks/useRedirectIfSignedIn';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
-    useRedirectIfSignedIn('/');
+    useRedirectIfSignedIn('/dashboard');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
                     email,
                 }));
 
-                navigate('/', { replace: true });
+                navigate('/dashboard', { replace: true });
             } else {
                 setError('Sign in incomplete. Please complete any required steps (MFA/verification).');
             }

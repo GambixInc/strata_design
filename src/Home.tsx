@@ -1,7 +1,7 @@
 // src/Home.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 
 // Import components
@@ -32,6 +32,7 @@ interface Recommendation {
 }
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
@@ -190,14 +191,16 @@ const Home: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simple mock authentication
-    setTimeout(() => {
-      setCurrentUser({
-        name: 'Olivia Rhye',
-        role: 'Admin'
-      });
+    // Check if user is authenticated using the same key as Login component
+    const checkAuth = () => {
+      const user = localStorage.getItem('currentUser');
+      if (user) {
+        setCurrentUser(JSON.parse(user));
+      }
       setLoading(false);
-    }, 1000);
+    };
+
+    checkAuth();
   }, []);
 
   // Remove the URL sync useEffect since we're using state-based navigation
@@ -306,39 +309,10 @@ const Home: React.FC = () => {
     );
   }
 
-  // If user is not logged in, show the marketing page
+  // If user is not logged in, redirect to landing page
   if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-slate-800">
-        <nav className="sticky top-0 z-20 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white">S</span>
-              <span>Strata</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">Home</Link>
-              <Link to="/login" className="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">Login</Link>
-            </div>
-          </div>
-        </nav>
-
-        {/* Guest user marketing page content */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">
-              Welcome to Strata
-            </h1>
-            <p className="text-xl text-slate-600 mb-8">
-              Your comprehensive SEO and website optimization platform
-            </p>
-            <Link to="/login" className="inline-flex items-center rounded-md bg-violet-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-violet-500">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    navigate('/');
+    return null;
   }
 
   // Debug: Log current state
