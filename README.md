@@ -1,4 +1,4 @@
-# Strata - AI-Powered Website Optimization Platform
+# Strata - AI-Powered Website Optimization Platform (React Router v6 Compatible)
 
 This repository contains two main components:
 
