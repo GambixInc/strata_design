@@ -105,28 +105,20 @@ const Home: React.FC = () => {
     }, 1000);
   }, []);
 
-  useEffect(() => {
-    // Update active page based on current URL
-    const path = location.pathname;
-    if (path === '/project') {
-      setActivePage('project');
-    } else {
-      setActivePage('home');
-    }
-  }, [location.pathname]);
+  // Remove the URL sync useEffect since we're using state-based navigation
 
   const handleNavigation = (navItem: NavItem) => {
-    console.log('Navigating to:', navItem.id);
+    console.log('Navigating to:', navItem.id, 'Current activePage:', activePage);
     setActivePage(navItem.id);
-    if (navItem.path !== location.pathname) {
-      navigate(navItem.path);
-    }
+    console.log('Active page set to:', navItem.id);
+    // Don't use navigate() for internal navigation - just update the state
+    // This keeps everything within the same component
   };
 
   const handleBackToHome = () => {
     console.log('Going back to home');
     setActivePage('home');
-    navigate('/');
+    // Don't navigate - just update state
   };
 
   const handleViewRecommendation = (title: string) => {
@@ -136,7 +128,7 @@ const Home: React.FC = () => {
   const handleViewResults = (website: any) => {
     console.log('Viewing results for:', website.url);
     setActivePage('project');
-    navigate('/project');
+    // Don't navigate - just update state
   };
 
   const handleEdit = (website: any) => {
@@ -213,8 +205,13 @@ const Home: React.FC = () => {
     );
   }
 
+  // Debug: Log current state
+  console.log('Current activePage:', activePage);
+  console.log('Current user:', currentUser);
+
   // Project page component
   const ProjectPage = () => {
+    console.log('Rendering ProjectPage component');
     return (
       <div className="project-page">
         <ProjectHeader 
@@ -270,6 +267,24 @@ const Home: React.FC = () => {
 
   return (
     <div className="dashboard-layout">
+      {/* Debug info - remove this later */}
+      <div style={{ 
+        position: 'fixed', 
+        top: '10px', 
+        right: '10px', 
+        background: 'rgba(0,0,0,0.8)', 
+        color: 'white', 
+        padding: '10px', 
+        borderRadius: '5px', 
+        zIndex: 9999,
+        fontSize: '12px'
+      }}>
+        Active Page: {activePage}
+        <br />
+        <button onClick={() => setActivePage('home')} style={{ marginRight: '5px' }}>Home</button>
+        <button onClick={() => setActivePage('project')}>Project</button>
+      </div>
+
       <Sidebar 
         sidebarOpen={sidebarOpen}
         activePage={activePage}
@@ -280,7 +295,7 @@ const Home: React.FC = () => {
       <main className="main-content">
         {activePage === 'project' ? (
           <ProjectPage />
-        ) : (
+        ) : activePage === 'home' ? (
           <>
             <Header userName={currentUser.name} userRole={currentUser.role} />
 
@@ -331,6 +346,13 @@ const Home: React.FC = () => {
               />
             </div>
           </>
+        ) : (
+          // Fallback for any other page
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Page: {activePage}</h2>
+            <p>This page is under construction.</p>
+            <button onClick={() => setActivePage('home')}>Go to Home</button>
+          </div>
         )}
       </main>
     </div>
