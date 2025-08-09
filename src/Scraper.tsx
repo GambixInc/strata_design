@@ -1,5 +1,6 @@
 // Scraper.tsx - Web scraper and optimizer tool UI
 import React, { useState, useEffect } from 'react';
+import ApiService, { handleApiError } from './services/api';
 import './Scraper.css';
 
 // Type definitions for data structures
@@ -49,24 +50,17 @@ const Scraper: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/scrape', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: url.trim() })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
+      const result = await ApiService.scrapeWebsite(url.trim());
+      
+      if (result.success && result.data) {
         setScrapedData(result.data);
         showAlert(`✅ Successfully scraped! Files saved to: ${result.data.saved_directory}`, 'success');
       } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
+        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+      const errorMessage = handleApiError(error);
+      showAlert(`❌ Error: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -81,28 +75,18 @@ const Scraper: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/optimize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          url: url.trim(),
-          user_profile: userProfile
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
+      const result = await ApiService.optimizeWebsite(url.trim(), userProfile);
+      
+      if (result.success && result.data) {
         showAlert(`✅ Successfully optimized for ${userProfile}! Files saved to: ${result.data.optimized_directory}`, 'success');
         setActiveTab('files');
         loadFiles();
       } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
+        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+      const errorMessage = handleApiError(error);
+      showAlert(`❌ Error: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -111,16 +95,16 @@ const Scraper: React.FC = () => {
   // Load files from backend
   const loadFiles = async () => {
     try {
-      const response = await fetch('/api/files');
-      const result = await response.json();
-
-      if (result.success) {
+      const result = await ApiService.getFiles();
+      
+      if (result.success && result.data) {
         setFiles(result.data);
       } else {
-        showAlert(`❌ Error: ${result.error}`, 'error');
+        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
-      showAlert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+      const errorMessage = handleApiError(error);
+      showAlert(`❌ Error: ${errorMessage}`, 'error');
     }
   };
 

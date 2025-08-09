@@ -2,48 +2,31 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
 import './Login.css';
-import { useRedirectIfSignedIn } from './hooks/useRedirectIfSignedIn';
+import { useAuth } from './hooks/useAuth';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
-    useRedirectIfSignedIn('/dashboard');
+    const { login, isLoading, error, isAuthenticated } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+
+    // Redirect if already authenticated
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [isAuthenticated, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-
+        
         try {
-            await signIn({ username: email, password });
-
-            const [attributes, session] = await Promise.all([
-                fetchUserAttributes().catch(() => ({} as any)),
-                fetchAuthSession(),
-            ]);
-
-            if (session.tokens) {
-                const groups = session.tokens?.accessToken.payload["cognito:groups"] as string[] | undefined;
-
-                localStorage.setItem('currentUser', JSON.stringify({
-                    name: (attributes as any).name || (attributes as any).email || email,
-                    role: groups?.[0] || 'user',
-                    email,
-                }));
-
-                navigate('/dashboard', { replace: true });
-            } else {
-                setError('Sign in incomplete. Please complete any required steps (MFA/verification).');
-            }
+            await login(email, password);
+            navigate('/dashboard', { replace: true });
         } catch (err: any) {
-            setError(err.message || 'An unknown error occurred');
-        } finally {
-            setIsLoading(false);
+            // Error is handled by the useAuth hook
+            console.error('Login failed:', err);
         }
     };
 
