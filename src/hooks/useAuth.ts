@@ -12,6 +12,7 @@ import {
   resendSignUpCode
 } from 'aws-amplify/auth';
 import ApiService from '../services/api';
+import { handleCognitoError } from '../utils/errorHandler';
 
 export interface User {
   id: string;
@@ -32,14 +33,12 @@ export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: true,
+    isLoading: false,
     error: null,
   });
 
-  // Check authentication status on mount
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
+  // Don't automatically check authentication on mount
+  // Only check when explicitly requested (like during login)
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -81,13 +80,13 @@ export const useAuth = () => {
           error: null,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auth check failed:', error);
       
-      // Clear any stale data on auth failure
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('authToken');
+      // Handle Cognito errors (including rate limiting)
+      handleCognitoError(error);
       
+      // If we get here, it's not a Cognito error, so just clear state
       setAuthState({
         user: null,
         isAuthenticated: false,
@@ -135,6 +134,9 @@ export const useAuth = () => {
         throw new Error('Sign in incomplete. Please complete any required steps (MFA/verification).');
       }
     } catch (error: any) {
+      // Handle Cognito errors (including rate limiting)
+      handleCognitoError(error);
+      
       const errorMessage = error.message || 'Login failed';
       setAuthState(prev => ({
         ...prev,

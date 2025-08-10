@@ -37,7 +37,7 @@ const ProjectResults: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'pages' | 'recommendations' | 'alerts'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'pages' | 'recommendations' | 'alerts'>('pages');
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -130,7 +130,7 @@ const ProjectResults: React.FC = () => {
       <div className="project-results-container">
         <Sidebar
           sidebarOpen={sidebarOpen}
-          activePage="project"
+          activePage="home"
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
           userName={user?.name || 'User'}
@@ -151,7 +151,7 @@ const ProjectResults: React.FC = () => {
       <div className="project-results-container">
         <Sidebar
           sidebarOpen={sidebarOpen}
-          activePage="project"
+          activePage="home"
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
           userName={user?.name || 'User'}
@@ -175,7 +175,7 @@ const ProjectResults: React.FC = () => {
     <div className="project-results-container">
       <Sidebar
         sidebarOpen={sidebarOpen}
-        activePage="project"
+        activePage="home"
         onNavigation={handleNavigation}
         onToggleSidebar={handleToggleSidebar}
         userName={user?.name || 'User'}
@@ -183,186 +183,78 @@ const ProjectResults: React.FC = () => {
       />
       
       <div className="main-content">
-        {/* Header */}
-        <div className="project-header">
-          <div className="project-info">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-              <i className="fas fa-arrow-left"></i>
-              Back to Dashboard
-            </button>
-            <h1>{project.name}</h1>
-            <p className="project-url">{project.url}</p>
-          </div>
-          <div className="project-stats">
-            <div className="stat-item">
-              <span className="stat-label">Health Score</span>
-              <span className={`stat-value ${project.healthScore < 70 ? 'warning' : ''}`}>
-                {project.healthScore}%
-              </span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Pages Scraped</span>
-              <span className="stat-value">{project.pages.length}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Last Updated</span>
-              <span className="stat-value">{formatDate(project.lastUpdated)}</span>
-            </div>
-          </div>
+        {/* Simple Header */}
+        <div className="simple-header">
+          <button className="back-btn" onClick={() => navigate('/dashboard')}>
+            <i className="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </button>
+          <h1>SEO Scraped Data - {project.name}</h1>
+          <p className="project-url">{project.url}</p>
         </div>
 
-        {/* Tabs */}
-        <div className="project-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <i className="fas fa-chart-line"></i>
-            Overview
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'pages' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pages')}
-          >
-            <i className="fas fa-file-alt"></i>
-            Pages ({project.pages.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'recommendations' ? 'active' : ''}`}
-            onClick={() => setActiveTab('recommendations')}
-          >
-            <i className="fas fa-lightbulb"></i>
-            Recommendations ({project.recommendations.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`}
-            onClick={() => setActiveTab('alerts')}
-          >
-            <i className="fas fa-exclamation-triangle"></i>
-            Alerts ({project.alerts.length})
-          </button>
-        </div>
+        {/* Simple SEO Data Display */}
+        <div className="seo-data-container">
+          <div className="seo-summary">
+            <h3>Summary</h3>
+            <p>Pages Scraped: {project.pages.length}</p>
+            <p>Health Score: {project.healthScore}%</p>
+            <p>Last Updated: {formatDate(project.lastUpdated)}</p>
+          </div>
 
-        {/* Tab Content */}
-        <div className="tab-content">
-          {activeTab === 'overview' && (
-            <div className="overview-tab">
-              <div className="overview-grid">
-                <div className="overview-card">
-                  <h3>Site Health Overview</h3>
-                  <div className="health-score-display">
-                    <div className="health-circle">
-                      <span className="health-number">{project.healthScore}%</span>
-                    </div>
-                    <p className="health-status">
-                      {project.healthScore >= 90 ? 'Excellent' : 
-                       project.healthScore >= 70 ? 'Good' : 
-                       project.healthScore >= 50 ? 'Fair' : 'Poor'}
-                    </p>
-                  </div>
-                </div>
+          <div className="seo-pages">
+            <h3>Scraped Pages</h3>
+            {project.pages.map((page) => (
+              <div key={page.id} className="page-data">
+                <h4>{page.title}</h4>
+                <p><strong>URL:</strong> {page.url}</p>
+                <p><strong>Status:</strong> {page.status}</p>
+                <p><strong>Load Time:</strong> {page.loadTime}s</p>
+                <p><strong>Size:</strong> {page.size}</p>
+                <p><strong>Last Scraped:</strong> {formatDate(page.lastScraped)}</p>
                 
-                <div className="overview-card">
-                  <h3>Quick Stats</h3>
-                  <div className="stats-list">
-                    <div className="stat-row">
-                      <span>Total Pages:</span>
-                      <span>{project.pages.length}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span>Issues Found:</span>
-                      <span>{project.pages.reduce((acc, page) => acc + page.issues.length, 0)}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span>Avg Load Time:</span>
-                      <span>{(project.pages.reduce((acc, page) => acc + page.loadTime, 0) / project.pages.length).toFixed(1)}s</span>
-                    </div>
+                {page.issues.length > 0 && (
+                  <div className="page-issues">
+                    <h5>Issues Found:</h5>
+                    <ul>
+                      {page.issues.map((issue, index) => (
+                        <li key={index}>{issue}</li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
+                )}
+                
+                {page.recommendations.length > 0 && (
+                  <div className="page-recommendations">
+                    <h5>Recommendations:</h5>
+                    <ul>
+                      {page.recommendations.map((rec, index) => (
+                        <li key={index}>{rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {activeTab === 'pages' && (
-            <div className="pages-tab">
-              <div className="pages-list">
-                {project.pages.map((page) => (
-                  <div key={page.id} className="page-card">
-                    <div className="page-header">
-                      <div className="page-info">
-                        <h4>{page.title}</h4>
-                        <p className="page-url">{page.url}</p>
-                      </div>
-                      <div className="page-status">
-                        <span className={`status-badge ${page.status}`}>
-                          {page.status}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="page-details">
-                      <div className="page-stats">
-                        <span>Load Time: {page.loadTime}s</span>
-                        <span>Size: {page.size}</span>
-                        <span>Last Scraped: {formatDate(page.lastScraped)}</span>
-                      </div>
-                      {page.issues.length > 0 && (
-                        <div className="page-issues">
-                          <h5>Issues Found:</h5>
-                          <ul>
-                            {page.issues.map((issue, index) => (
-                              <li key={index}>{issue}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="seo-recommendations">
+            <h3>Overall Recommendations</h3>
+            <ul>
+              {project.recommendations.map((recommendation, index) => (
+                <li key={index}>{recommendation}</li>
+              ))}
+            </ul>
+          </div>
 
-          {activeTab === 'recommendations' && (
-            <div className="recommendations-tab">
-              <div className="recommendations-list">
-                {project.recommendations.map((recommendation, index) => (
-                  <div key={index} className="recommendation-card">
-                    <div className="recommendation-icon">
-                      <i className="fas fa-lightbulb"></i>
-                    </div>
-                    <div className="recommendation-content">
-                      <p>{recommendation}</p>
-                    </div>
-                    <button className="recommendation-action">
-                      <i className="fas fa-check"></i>
-                      Mark as Done
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'alerts' && (
-            <div className="alerts-tab">
-              <div className="alerts-list">
-                {project.alerts.map((alert, index) => (
-                  <div key={index} className="alert-card">
-                    <div className="alert-icon">
-                      <i className="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div className="alert-content">
-                      <p>{alert}</p>
-                    </div>
-                    <button className="alert-action">
-                      <i className="fas fa-times"></i>
-                      Dismiss
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="seo-alerts">
+            <h3>Alerts</h3>
+            <ul>
+              {project.alerts.map((alert, index) => (
+                <li key={index}>{alert}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

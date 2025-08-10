@@ -5,7 +5,7 @@ import './App.css';
 import './Account.css';
 import Sidebar from './components/Sidebar';
 import ApiService, { handleApiError } from './services/api';
-import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
+
 import { useAuth } from './hooks/useAuth';
 
 interface UserProfile {
@@ -119,12 +119,7 @@ const Account: React.FC = () => {
   // Load user profile from backend
   useEffect(() => {
     const loadUserProfile = async () => {
-      // Check authentication first
-      if (!isAuthenticated()) {
-        clearAuthAndRedirect();
-        return;
-      }
-
+      // Since this component is protected by ProtectedRoute, we can assume user is authenticated
       try {
         setLoading(true);
         setError(null);
@@ -150,11 +145,11 @@ const Account: React.FC = () => {
         setError(errorMessage);
         console.error('Error loading profile:', errorMessage);
         
-        // If it's an authentication error, redirect to login
+        // If it's an authentication error, let the auth system handle it
         if (errorMessage.includes('Authentication required') || 
             errorMessage.includes('Token expired') ||
             errorMessage.includes('Invalid or expired token')) {
-          clearAuthAndRedirect();
+          console.error('Authentication error:', errorMessage);
         }
       } finally {
         setLoading(false);

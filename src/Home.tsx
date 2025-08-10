@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import ApiService, { useApiCall, handleApiError } from './services/api';
-import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
+
 import { useAuth } from './hooks/useAuth';
 
 // Import components
@@ -189,75 +189,64 @@ const Home: React.FC = () => {
   const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
 
   useEffect(() => {
-    // Check if user is authenticated and token is valid
-    const checkAuth = async () => {
-      if (!isAuthenticated()) {
-        // User is not authenticated or token is expired
-        clearAuthAndRedirect();
-        return;
-      }
-
-      const user = getCurrentUser();
-      if (user) {
-        setCurrentUser(user);
+    // Since this component is protected by ProtectedRoute, we can assume user is authenticated
+    // Just fetch the data from backend
+    const fetchData = async () => {
+      try {
+        setLoadingData(true);
+        setDataError(null);
         
-        // Fetch real data from backend
-        try {
-          setLoadingData(true);
-          setDataError(null);
-          
-          // Fetch projects and dashboard data in parallel
-          const [projectsResponse, dashboardResponse] = await Promise.all([
-            ApiService.getProjects(),
-            ApiService.getDashboardData()
-          ]);
-          
-          if (projectsResponse.success) {
-            setWebsites(projectsResponse.data || []);
-          } else {
-            // Backend error - will be handled in catch block
-            throw new Error('Failed to load projects');
-          }
-          
-          if (dashboardResponse.success) {
-            setDashboardData(dashboardResponse.data);
-          } else {
-            // Backend error - will be handled in catch block
-            throw new Error('Failed to load dashboard data');
-          }
-        } catch (err) {
-          const errorMessage = handleApiError(err);
-          console.error('Error loading data:', errorMessage);
-          
-          // Handle different types of errors
-          if (errorMessage.includes('Authentication required') || 
-              errorMessage.includes('Token expired') ||
-              errorMessage.includes('Invalid or expired token')) {
-            // Authentication error - redirect to login
-            clearAuthAndRedirect();
-          } else if (errorMessage.includes('500') || 
-                     errorMessage.includes('Failed to connect') ||
-                     errorMessage.includes('Network error')) {
-            // Backend/server error - show dashboard with demo data
-            console.warn('Backend error, showing dashboard with fallback data');
-            setWebsites(demoWebsites); // Use demo data instead of empty list
-            setDashboardData(null); // Will use default data
-            setDataError(null); // Don't show error, show dashboard instead
-          } else {
-            // Other errors (like 404, validation errors, etc.) - show empty state
-            console.warn('API error, showing empty state');
-            setWebsites([]); // Empty list for user with no projects
-            setDashboardData(null); // Will use default data
-            setDataError(null); // Don't show error, show empty state instead
-          }
-        } finally {
-          setLoadingData(false);
+        // Fetch projects and dashboard data in parallel
+        const [projectsResponse, dashboardResponse] = await Promise.all([
+          ApiService.getProjects(),
+          ApiService.getDashboardData()
+        ]);
+        
+        if (projectsResponse.success) {
+          setWebsites(projectsResponse.data || []);
+        } else {
+          // Backend error - will be handled in catch block
+          throw new Error('Failed to load projects');
         }
+        
+        if (dashboardResponse.success) {
+          setDashboardData(dashboardResponse.data);
+        } else {
+          // Backend error - will be handled in catch block
+          throw new Error('Failed to load dashboard data');
+        }
+      } catch (err) {
+        const errorMessage = handleApiError(err);
+        console.error('Error loading data:', errorMessage);
+        
+        // Handle different types of errors
+        if (errorMessage.includes('Authentication required') || 
+            errorMessage.includes('Token expired') ||
+            errorMessage.includes('Invalid or expired token')) {
+          // Authentication error - let the auth system handle it
+          console.error('Authentication error:', errorMessage);
+        } else if (errorMessage.includes('500') || 
+                   errorMessage.includes('Failed to connect') ||
+                   errorMessage.includes('Network error')) {
+          // Backend/server error - show dashboard with demo data
+          console.warn('Backend error, showing dashboard with fallback data');
+          setWebsites(demoWebsites); // Use demo data instead of empty list
+          setDashboardData(null); // Will use default data
+          setDataError(null); // Don't show error, show dashboard instead
+        } else {
+          // Other errors (like 404, validation errors, etc.) - show empty state
+          console.warn('API error, showing empty state');
+          setWebsites([]); // Empty list for user with no projects
+          setDashboardData(null); // Will use default data
+          setDataError(null); // Don't show error, show empty state instead
+        }
+      } finally {
+        setLoadingData(false);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    checkAuth();
+    fetchData();
   }, []);
 
   // Remove the URL sync useEffect since we're using state-based navigation

@@ -1,5 +1,7 @@
 // src/services/api.ts
 
+import { redirectToError } from '../utils/errorHandler';
+
 // API Response Types
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -49,13 +51,9 @@ const getDefaultHeaders = (): HeadersInit => {
   if (token && !isTokenExpired(token)) {
     headers['Authorization'] = `Bearer ${token}`;
   } else if (token && isTokenExpired(token)) {
-    // Clear expired token
+    // Clear expired token but don't redirect - let the auth system handle it
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
-    
-    // Redirect to login
-    window.location.href = '/login';
-    throw new ApiError('Token expired. Please log in again.', 401);
   }
 
   return headers;
@@ -89,12 +87,7 @@ async function apiRequest<T>(
       
       // Handle authentication errors (401, 403)
       if (response.status === 401 || response.status === 403) {
-        // Clear invalid tokens and redirect to login
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('currentUser');
-        
-        // Redirect to login page
-        window.location.href = '/login';
+        redirectToError('auth', 'Authentication required. Please log in again.');
         throw new ApiError('Authentication required. Please log in again.', response.status);
       }
       
