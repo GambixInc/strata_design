@@ -8,7 +8,7 @@ import Account from './Account'; // Account page
 import SignUp from './SignUp'; // SignUp page
 import ProjectResults from './ProjectResults'; // Project results page
 import ProtectedRoute from './components/ProtectedRoute';
-import { useAuth } from './hooks/useAuth';
+
 import ErrorPage from './ErrorPage'; // Error page
 import './App.css';
 

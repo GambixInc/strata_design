@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { useAuth } from './hooks/useAuth';
-import ApiService from './services/api';
+
 import './ProjectResults.css';
 
 interface ScrapedPage {
@@ -37,7 +37,7 @@ const ProjectResults: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'pages' | 'recommendations' | 'alerts'>('pages');
+
 
   useEffect(() => {
     const fetchProjectData = async () => {

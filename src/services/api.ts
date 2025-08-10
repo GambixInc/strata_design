@@ -12,13 +12,14 @@ export interface ApiResponse<T = any> {
 
 // API Error class for better error handling
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public data?: any
-  ) {
+  public status?: number;
+  public data?: any;
+  
+  constructor(message: string, status?: number, data?: any) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
   }
 }
 

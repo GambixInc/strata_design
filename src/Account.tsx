@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import './App.css';
 import './Account.css';
 import Sidebar from './components/Sidebar';
@@ -18,7 +18,7 @@ interface UserProfile {
 }
 
 const Account: React.FC = () => {
-  const navigate = useNavigate();
+
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('details');
   

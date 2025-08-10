@@ -16,8 +16,8 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-container">
       <Sidebar
         userName="Olivia Rhye"
-        userEmail="olivia@strata.com"
-        userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
+
+
         onLogout={handleLogout}
       />
       <main className="dashboard-main-content">

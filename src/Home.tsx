@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
-import ApiService, { useApiCall, handleApiError } from './services/api';
+import ApiService, { handleApiError } from './services/api';
 
 import { useAuth } from './hooks/useAuth';
 
@@ -141,7 +141,7 @@ const Home: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+
 
   // ALL useEffect hooks must be called in the same order every time
   // Fetch data from backend
@@ -358,7 +358,7 @@ const Home: React.FC = () => {
 
   const handleRetry = () => {
     setDataError(null);
-    setRetryCount(0);
+    
     // Trigger a re-render to reload data
     window.location.reload();
   };

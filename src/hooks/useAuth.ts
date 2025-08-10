@@ -11,7 +11,7 @@ import {
   confirmSignUp,
   resendSignUpCode
 } from 'aws-amplify/auth';
-import ApiService from '../services/api';
+
 import { handleCognitoError } from '../utils/errorHandler';
 
 export interface User {
