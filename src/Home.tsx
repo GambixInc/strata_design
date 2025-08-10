@@ -38,7 +38,6 @@ interface Recommendation {
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -144,50 +143,8 @@ const Home: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Demo data for when backend is unavailable
-  const demoWebsites = [
-    {
-      id: 'demo-1',
-      url: 'https://example.com',
-      icon: 'fas fa-globe',
-      status: 'Active',
-      healthScore: 85,
-      recommendations: 12,
-      autoOptimize: true,
-      lastUpdated: '2 hours ago'
-    },
-    {
-      id: 'demo-2',
-      url: 'https://demo-site.com',
-      icon: 'fas fa-shopping-cart',
-      status: 'Needs Attention',
-      healthScore: 65,
-      recommendations: 8,
-      autoOptimize: false,
-      lastUpdated: '1 day ago'
-    }
-  ];
-
-  // Default data for when backend data is not available
-  const defaultPageStatuses = [
-    { type: 'healthy' as const, count: 0, label: 'Healthy Pages' },
-    { type: 'broken' as const, count: 0, label: 'Broken Pages' },
-    { type: 'issues' as const, count: 0, label: 'Have Issues' }
-  ];
-
-  const defaultPerformanceData = [
-    { title: 'Technical SEO', score: 0 },
-    { title: 'Content & On-Page SEO', score: 0 },
-    { title: 'Performance & Core Web Vitals', score: 0 },
-    { title: 'Internal Linking & Site Architecture', score: 0 },
-    { title: 'Visual UX & Accessibility', score: 0 },
-    { title: 'Authority & Backlinks', score: 0 }
-  ];
-
-  // Use real data or defaults
-  const pageStatuses = dashboardData?.page_statuses || defaultPageStatuses;
-  const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
-
+  // ALL useEffect hooks must be called in the same order every time
+  // Fetch data from backend
   useEffect(() => {
     // Since this component is protected by ProtectedRoute, we can assume user is authenticated
     // Just fetch the data from backend
@@ -247,9 +204,51 @@ const Home: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user]); // Only fetch data when user is available
 
-  // Remove the URL sync useEffect since we're using state-based navigation
+  // Demo data for when backend is unavailable
+  const demoWebsites = [
+    {
+      id: 'demo-1',
+      url: 'https://example.com',
+      icon: 'fas fa-globe',
+      status: 'Active',
+      healthScore: 85,
+      recommendations: 12,
+      autoOptimize: true,
+      lastUpdated: '2 hours ago'
+    },
+    {
+      id: 'demo-2',
+      url: 'https://demo-site.com',
+      icon: 'fas fa-shopping-cart',
+      status: 'Needs Attention',
+      healthScore: 65,
+      recommendations: 8,
+      autoOptimize: false,
+      lastUpdated: '1 day ago'
+    }
+  ];
+
+  // Default data for when backend data is not available
+  const defaultPageStatuses = [
+    { type: 'healthy' as const, count: 0, label: 'Healthy Pages' },
+    { type: 'broken' as const, count: 0, label: 'Broken Pages' },
+    { type: 'issues' as const, count: 0, label: 'Have Issues' }
+  ];
+
+  const defaultPerformanceData = [
+    { title: 'Technical SEO', score: 0 },
+    { title: 'Content & On-Page SEO', score: 0 },
+    { title: 'Performance & Core Web Vitals', score: 0 },
+    { title: 'Internal Linking & Site Architecture', score: 0 },
+    { title: 'Visual UX & Accessibility', score: 0 },
+    { title: 'Authority & Backlinks', score: 0 }
+  ];
+
+  // Use real data or defaults
+  const pageStatuses = dashboardData?.page_statuses || defaultPageStatuses;
+  const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
 
   const handleNavigation = (navItem: NavItem) => {
     console.log('Navigating to:', navItem.id, 'Current activePage:', activePage);
@@ -382,15 +381,19 @@ const Home: React.FC = () => {
     );
   }
 
-  // If user is not logged in, redirect to landing page
-  if (!currentUser) {
-    navigate('/');
-    return null;
+  // Show loading while user data is being fetched
+  if (!user) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading user data...</p>
+      </div>
+    );
   }
 
   // Debug: Log current state
   console.log('Current activePage:', activePage);
-  console.log('Current user:', currentUser);
+  console.log('Current user:', user);
 
   // Recommendation Detail Page
   if (activePage === 'recommendation' && currentRecommendation) {
@@ -404,7 +407,7 @@ const Home: React.FC = () => {
           activePage="project"
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
-          userName={user?.name || currentUser?.name || 'User'}
+          userName={user?.name || 'User'}
           onLogout={logout}
         />
         <div className="main-content">
@@ -435,7 +438,7 @@ const Home: React.FC = () => {
       <div className="project-page">
         <ProjectHeader 
           projectName="inthebox.io"
-          userName={currentUser.name}
+          userName={user.name}
           onBack={handleBackToHome}
         />
 
@@ -469,7 +472,7 @@ const Home: React.FC = () => {
           <div className="performance-section">
             <h2>Performance Breakdown</h2>
             <div className="performance-grid">
-              {performanceData.map((item, index) => (
+              {performanceData.map((item: any, index: number) => (
                 <PerformanceCard
                   key={index}
                   title={item.title}
@@ -491,7 +494,7 @@ const Home: React.FC = () => {
         activePage={activePage}
         onNavigation={handleNavigation}
         onToggleSidebar={handleToggleSidebar}
-        userName={user?.name || currentUser?.name || 'User'}
+                    userName={user?.name || 'User'}
         onLogout={logout}
       />
 
@@ -501,7 +504,7 @@ const Home: React.FC = () => {
           <ProjectPage />
         ) : activePage === 'home' ? (
           <>
-            <Header userName={currentUser?.name || 'User'} userRole={currentUser?.role || 'user'} />
+            <Header userName={user?.name || 'User'} userRole={user?.role || 'user'} />
 
             {/* Dashboard Content */}
             <div className="dashboard-content">
