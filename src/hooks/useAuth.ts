@@ -70,6 +70,10 @@ export const useAuth = () => {
           error: null,
         });
       } else {
+        // Clear any stale data
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        
         setAuthState({
           user: null,
           isAuthenticated: false,
@@ -79,6 +83,11 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Auth check failed:', error);
+      
+      // Clear any stale data on auth failure
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('authToken');
+      
       setAuthState({
         user: null,
         isAuthenticated: false,

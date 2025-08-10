@@ -23,16 +23,39 @@ export class ApiError extends Error {
 // Base API configuration
 const API_BASE_URL = '/api';
 
+// Check if token is expired
+const isTokenExpired = (token: string): boolean => {
+  try {
+    // Decode the JWT token (without verification since we're just checking expiration)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    
+    // Check if token is expired (with 5 minute buffer)
+    return payload.exp < (currentTime + 300);
+  } catch (error) {
+    // If we can't decode the token, consider it expired
+    return true;
+  }
+};
+
 // Default headers for API requests
 const getDefaultHeaders = (): HeadersInit => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  // Add authentication token if available
+  // Add authentication token if available and not expired
   const token = localStorage.getItem('authToken');
-  if (token) {
+  if (token && !isTokenExpired(token)) {
     headers['Authorization'] = `Bearer ${token}`;
+  } else if (token && isTokenExpired(token)) {
+    // Clear expired token
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    
+    // Redirect to login
+    window.location.href = '/login';
+    throw new ApiError('Token expired. Please log in again.', 401);
   }
 
   return headers;
@@ -62,6 +85,17 @@ async function apiRequest<T>(
         errorMessage = errorData.error || errorData.message || errorMessage;
       } catch {
         // If we can't parse the error response, use the default message
+      }
+      
+      // Handle authentication errors (401, 403)
+      if (response.status === 401 || response.status === 403) {
+        // Clear invalid tokens and redirect to login
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        
+        // Redirect to login page
+        window.location.href = '/login';
+        throw new ApiError('Authentication required. Please log in again.', response.status);
       }
       
       throw new ApiError(errorMessage, response.status);

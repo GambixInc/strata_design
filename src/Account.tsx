@@ -5,6 +5,7 @@ import './App.css';
 import './Account.css';
 import Sidebar from './components/Sidebar';
 import ApiService, { handleApiError } from './services/api';
+import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
 
 interface UserProfile {
   firstName: string;
@@ -117,6 +118,12 @@ const Account: React.FC = () => {
   // Load user profile from backend
   useEffect(() => {
     const loadUserProfile = async () => {
+      // Check authentication first
+      if (!isAuthenticated()) {
+        clearAuthAndRedirect();
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
@@ -141,6 +148,13 @@ const Account: React.FC = () => {
         const errorMessage = handleApiError(err);
         setError(errorMessage);
         console.error('Error loading profile:', errorMessage);
+        
+        // If it's an authentication error, redirect to login
+        if (errorMessage.includes('Authentication required') || 
+            errorMessage.includes('Token expired') ||
+            errorMessage.includes('Invalid or expired token')) {
+          clearAuthAndRedirect();
+        }
       } finally {
         setLoading(false);
       }

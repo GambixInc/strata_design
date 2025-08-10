@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import ApiService, { useApiCall, handleApiError } from './services/api';
+import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
 
 // Import components
 import Sidebar from './components/Sidebar';
@@ -139,6 +140,7 @@ const Home: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Default data for when backend data is not available
   const defaultPageStatuses = [
@@ -161,11 +163,17 @@ const Home: React.FC = () => {
   const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
 
   useEffect(() => {
-    // Check if user is authenticated using the same key as Login component
+    // Check if user is authenticated and token is valid
     const checkAuth = async () => {
-      const user = localStorage.getItem('currentUser');
+      if (!isAuthenticated()) {
+        // User is not authenticated or token is expired
+        clearAuthAndRedirect();
+        return;
+      }
+
+      const user = getCurrentUser();
       if (user) {
-        setCurrentUser(JSON.parse(user));
+        setCurrentUser(user);
         
         // Fetch real data from backend
         try {
@@ -191,8 +199,22 @@ const Home: React.FC = () => {
           }
         } catch (err) {
           const errorMessage = handleApiError(err);
-          setDataError(errorMessage);
           console.error('Error loading data:', errorMessage);
+          
+          // Handle different types of errors
+          if (errorMessage.includes('Authentication required') || 
+              errorMessage.includes('Token expired') ||
+              errorMessage.includes('Invalid or expired token')) {
+            // Authentication error - redirect to login
+            clearAuthAndRedirect();
+          } else if (errorMessage.includes('429') || errorMessage.includes('TOO MANY REQUESTS')) {
+            // Rate limiting error - show user-friendly message with retry option
+            setDataError('Server is busy. Please wait a moment and try again.');
+            setRetryCount(prev => prev + 1);
+          } else {
+            // Other errors - show the error message
+            setDataError(errorMessage);
+          }
         } finally {
           setLoadingData(false);
         }
@@ -309,6 +331,13 @@ const Home: React.FC = () => {
       setDataError(errorMessage);
       console.error('Error creating project:', errorMessage);
     }
+  };
+
+  const handleRetry = () => {
+    setDataError(null);
+    setRetryCount(0);
+    // Trigger a re-render to reload data
+    window.location.reload();
   };
 
   if (loading) {
@@ -461,8 +490,8 @@ const Home: React.FC = () => {
                 <div className="error-container">
                   <div className="error-message">
                     <i className="fas fa-exclamation-triangle"></i>
-                    <p>Error loading data: {dataError}</p>
-                    <button onClick={() => window.location.reload()}>Retry</button>
+                    <p>{dataError}</p>
+                    <button onClick={handleRetry}>Retry</button>
                   </div>
                 </div>
               )}
