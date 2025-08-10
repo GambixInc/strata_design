@@ -288,8 +288,8 @@ const Home: React.FC = () => {
 
   const handleViewResults = (website: any) => {
     console.log('Viewing results for:', website.url);
-    setActivePage('project');
-    // Don't navigate - just update state
+    // Navigate to the new ProjectResults page with the website ID
+    navigate(`/project/${website.id}`);
   };
 
   const handleEdit = (website: any) => {

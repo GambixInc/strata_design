@@ -6,6 +6,7 @@ import Login from './Login'; // Login page
 import Scraper from './Scraper'; // Scraper tool page
 import Account from './Account'; // Account page
 import SignUp from './SignUp'; // SignUp page
+import ProjectResults from './ProjectResults'; // Project results page
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -30,6 +31,11 @@ function App() {
         <Route path="/account" element={
           <ProtectedRoute>
             <Account />
+          </ProtectedRoute>
+        } />
+        <Route path="/project/:id" element={
+          <ProtectedRoute>
+            <ProjectResults />
           </ProtectedRoute>
         } />
         <Route path="/signup" element={<SignUp />} />
