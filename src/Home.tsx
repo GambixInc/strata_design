@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import ApiService, { useApiCall, handleApiError } from './services/api';
 import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
+import { useAuth } from './hooks/useAuth';
 
 // Import components
 import Sidebar from './components/Sidebar';
@@ -36,6 +37,7 @@ interface Recommendation {
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
@@ -413,6 +415,10 @@ const Home: React.FC = () => {
           activePage="project"
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
+          userName={user?.name || currentUser?.name || 'User'}
+          userEmail={user?.email || currentUser?.email || ''}
+          userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
+          onLogout={logout}
         />
         <div className="main-content">
           <RecommendationDetail
@@ -498,6 +504,10 @@ const Home: React.FC = () => {
         activePage={activePage}
         onNavigation={handleNavigation}
         onToggleSidebar={handleToggleSidebar}
+        userName={user?.name || currentUser?.name || 'User'}
+        userEmail={user?.email || currentUser?.email || ''}
+        userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
+        onLogout={logout}
       />
 
       {/* Main Content */}

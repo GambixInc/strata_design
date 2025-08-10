@@ -6,6 +6,7 @@ import './Account.css';
 import Sidebar from './components/Sidebar';
 import ApiService, { handleApiError } from './services/api';
 import { isAuthenticated, getCurrentUser, clearAuthAndRedirect } from './utils/auth';
+import { useAuth } from './hooks/useAuth';
 
 interface UserProfile {
   firstName: string;
@@ -18,6 +19,7 @@ interface UserProfile {
 
 const Account: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('details');
   
   const [profile, setProfile] = useState<UserProfile>({
@@ -111,8 +113,7 @@ const Account: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Add logout logic here
-    navigate('/login');
+    logout();
   };
 
   // Load user profile from backend
