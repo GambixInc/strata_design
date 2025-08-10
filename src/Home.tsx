@@ -142,6 +142,30 @@ const Home: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
+  // Demo data for when backend is unavailable
+  const demoWebsites = [
+    {
+      id: 'demo-1',
+      url: 'https://example.com',
+      icon: 'fas fa-globe',
+      status: 'Active',
+      healthScore: 85,
+      recommendations: 12,
+      autoOptimize: true,
+      lastUpdated: '2 hours ago'
+    },
+    {
+      id: 'demo-2',
+      url: 'https://demo-site.com',
+      icon: 'fas fa-shopping-cart',
+      status: 'Needs Attention',
+      healthScore: 65,
+      recommendations: 8,
+      autoOptimize: false,
+      lastUpdated: '1 day ago'
+    }
+  ];
+
   // Default data for when backend data is not available
   const defaultPageStatuses = [
     { type: 'healthy' as const, count: 0, label: 'Healthy Pages' },
@@ -189,13 +213,15 @@ const Home: React.FC = () => {
           if (projectsResponse.success) {
             setWebsites(projectsResponse.data || []);
           } else {
-            setDataError('Failed to load projects');
+            console.warn('Failed to load projects, using empty list');
+            setWebsites([]);
           }
           
           if (dashboardResponse.success) {
             setDashboardData(dashboardResponse.data);
           } else {
-            setDataError('Failed to load dashboard data');
+            console.warn('Failed to load dashboard data, using defaults');
+            setDashboardData(null); // Will use default data
           }
         } catch (err) {
           const errorMessage = handleApiError(err);
@@ -207,13 +233,12 @@ const Home: React.FC = () => {
               errorMessage.includes('Invalid or expired token')) {
             // Authentication error - redirect to login
             clearAuthAndRedirect();
-          } else if (errorMessage.includes('429') || errorMessage.includes('TOO MANY REQUESTS')) {
-            // Rate limiting error - show user-friendly message with retry option
-            setDataError('Server is busy. Please wait a moment and try again.');
-            setRetryCount(prev => prev + 1);
           } else {
-            // Other errors - show the error message
-            setDataError(errorMessage);
+            // For other errors (including 500, 429, etc.), show dashboard with fallback data
+            console.warn('Backend error, showing dashboard with fallback data');
+            setWebsites(demoWebsites); // Use demo data instead of empty list
+            setDashboardData(null); // Will use default data
+            setDataError(null); // Don't show error, show dashboard instead
           }
         } finally {
           setLoadingData(false);
@@ -485,7 +510,7 @@ const Home: React.FC = () => {
                 </div>
               )}
 
-              {/* Error State */}
+              {/* Error State - Only show for critical errors, not backend data errors */}
               {dataError && !loadingData && (
                 <div className="error-container">
                   <div className="error-message">
@@ -496,9 +521,17 @@ const Home: React.FC = () => {
                 </div>
               )}
 
-              {/* Content when data is loaded */}
-              {!loadingData && !dataError && (
+              {/* Content when data is loaded or when showing fallback data */}
+              {!loadingData && (
                 <>
+                  {/* Backend Status Notification */}
+                  {websites.length > 0 && websites.some(site => site.id.startsWith('demo-')) && !dataError && (
+                    <div className="backend-status-notification">
+                      <i className="fas fa-info-circle"></i>
+                      <span>Showing demo data - backend connection unavailable</span>
+                    </div>
+                  )}
+
                   {/* Search and New Project Section */}
                   <div className="search-section">
                     <div className="search-container">
