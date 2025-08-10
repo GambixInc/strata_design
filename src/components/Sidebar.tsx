@@ -14,8 +14,6 @@ interface SidebarProps {
   onNavigation?: (navItem: NavItem) => void;
   onToggleSidebar?: () => void;
   userName?: string;
-  userEmail?: string;
-  userAvatar?: string;
   onLogout?: () => void;
 }
 
@@ -25,8 +23,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   onNavigation, 
   onToggleSidebar,
   userName,
-  userEmail,
-  userAvatar,
   onLogout
 }) => {
   const navigate = useNavigate();
@@ -80,13 +76,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* User Info Section */}
+      {/* User Info Section - Removed duplicate email display */}
       {userName && sidebarOpen && (
         <div className="sidebar-user-info">
-          <img src={userAvatar || 'https://randomuser.me/api/portraits/women/44.jpg'} alt="User" className="user-avatar" />
+          <div className="user-avatar">
+            <i className="fas fa-user"></i>
+          </div>
           <div className="user-details">
             <div className="user-name">{userName}</div>
-            {userEmail && <div className="user-email">{userEmail}</div>}
           </div>
         </div>
       )}

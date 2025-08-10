@@ -168,8 +168,6 @@ const Account: React.FC = () => {
     <div className="dashboard-container">
       <Sidebar
         userName={`${profile.firstName} ${profile.lastName}`}
-        userEmail={profile.email}
-        userAvatar={profile.photo}
         onLogout={handleLogout}
       />
 

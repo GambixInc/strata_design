@@ -416,8 +416,6 @@ const Home: React.FC = () => {
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
           userName={user?.name || currentUser?.name || 'User'}
-          userEmail={user?.email || currentUser?.email || ''}
-          userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
           onLogout={logout}
         />
         <div className="main-content">
@@ -505,8 +503,6 @@ const Home: React.FC = () => {
         onNavigation={handleNavigation}
         onToggleSidebar={handleToggleSidebar}
         userName={user?.name || currentUser?.name || 'User'}
-        userEmail={user?.email || currentUser?.email || ''}
-        userAvatar="https://randomuser.me/api/portraits/women/44.jpg"
         onLogout={logout}
       />
 
