@@ -213,15 +213,15 @@ const Home: React.FC = () => {
           if (projectsResponse.success) {
             setWebsites(projectsResponse.data || []);
           } else {
-            console.warn('Failed to load projects, using empty list');
-            setWebsites([]);
+            // Backend error - will be handled in catch block
+            throw new Error('Failed to load projects');
           }
           
           if (dashboardResponse.success) {
             setDashboardData(dashboardResponse.data);
           } else {
-            console.warn('Failed to load dashboard data, using defaults');
-            setDashboardData(null); // Will use default data
+            // Backend error - will be handled in catch block
+            throw new Error('Failed to load dashboard data');
           }
         } catch (err) {
           const errorMessage = handleApiError(err);
@@ -233,12 +233,20 @@ const Home: React.FC = () => {
               errorMessage.includes('Invalid or expired token')) {
             // Authentication error - redirect to login
             clearAuthAndRedirect();
-          } else {
-            // For other errors (including 500, 429, etc.), show dashboard with fallback data
+          } else if (errorMessage.includes('500') || 
+                     errorMessage.includes('Failed to connect') ||
+                     errorMessage.includes('Network error')) {
+            // Backend/server error - show dashboard with demo data
             console.warn('Backend error, showing dashboard with fallback data');
             setWebsites(demoWebsites); // Use demo data instead of empty list
             setDashboardData(null); // Will use default data
             setDataError(null); // Don't show error, show dashboard instead
+          } else {
+            // Other errors (like 404, validation errors, etc.) - show empty state
+            console.warn('API error, showing empty state');
+            setWebsites([]); // Empty list for user with no projects
+            setDashboardData(null); // Will use default data
+            setDataError(null); // Don't show error, show empty state instead
           }
         } finally {
           setLoadingData(false);
@@ -532,55 +540,78 @@ const Home: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Search and New Project Section */}
-                  <div className="search-section">
-                    <div className="search-container">
-                      <i className="fas fa-search search-icon"></i>
-                      <input 
-                        type="text" 
-                        placeholder="Enter URL or Keyword" 
-                        className="search-input"
-                      />
+                  {/* Empty State for New Users */}
+                  {websites.length === 0 && !loadingData && !dataError && (
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <i className="fas fa-folder-open"></i>
+                      </div>
+                      <h3>No projects yet</h3>
+                      <p>Get started by creating your first project to monitor and optimize your website.</p>
+                      <button 
+                        className="create-first-project-btn"
+                        onClick={() => setShowCreateModal(true)}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Create Your First Project
+                      </button>
                     </div>
-                    <button 
-                      className="new-project-btn"
-                      onClick={() => setShowCreateModal(true)}
-                    >
-                      <i className="fas fa-plus"></i>
-                      New Project
-                    </button>
-                  </div>
-
-                  {/* Show alert only if there are websites with low health scores */}
-                  {websites.length > 0 && websites.some(site => site.healthScore < 70) && (
-                    <AlertBanner
-                      title="Low Site Health"
-                      description="Some sites have low health scores. Please review recommendations."
-                      time="Recently"
-                      priority="High Priority"
-                      progress={Math.min(...websites.map(site => site.healthScore))}
-                      onViewResults={() => handleViewResults(websites.find(site => site.healthScore < 70))}
-                      onDismiss={() => console.log('Dismissed alert')}
-                      onClose={() => console.log('Closed alert')}
-                    />
                   )}
 
-                  <SitesTable
-                    websites={websites}
-                    onViewResults={handleViewResults}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onToggleAutoOptimize={handleToggleAutoOptimize}
-                  />
+                  {/* Dashboard Content - Only show when there are projects or demo data */}
+                  {websites.length > 0 && (
+                    <>
+                      {/* Search and New Project Section */}
+                      <div className="search-section">
+                        <div className="search-container">
+                          <i className="fas fa-search search-icon"></i>
+                          <input 
+                            type="text" 
+                            placeholder="Enter URL or Keyword" 
+                            className="search-input"
+                          />
+                        </div>
+                        <button 
+                          className="new-project-btn"
+                          onClick={() => setShowCreateModal(true)}
+                        >
+                          <i className="fas fa-plus"></i>
+                          New Project
+                        </button>
+                      </div>
 
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={1}
-                    totalItems={websites.length}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={handlePageChange}
-                    onItemsPerPageChange={handleItemsPerPageChange}
-                  />
+                      {/* Show alert only if there are websites with low health scores */}
+                      {websites.some(site => site.healthScore < 70) && (
+                        <AlertBanner
+                          title="Low Site Health"
+                          description="Some sites have low health scores. Please review recommendations."
+                          time="Recently"
+                          priority="High Priority"
+                          progress={Math.min(...websites.map(site => site.healthScore))}
+                          onViewResults={() => handleViewResults(websites.find(site => site.healthScore < 70))}
+                          onDismiss={() => console.log('Dismissed alert')}
+                          onClose={() => console.log('Closed alert')}
+                        />
+                      )}
+
+                      <SitesTable
+                        websites={websites}
+                        onViewResults={handleViewResults}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleAutoOptimize={handleToggleAutoOptimize}
+                      />
+
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={1}
+                        totalItems={websites.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                      />
+                    </>
+                  )}
                 </>
               )}
             </div>
