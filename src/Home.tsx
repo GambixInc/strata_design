@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
+import ApiService, { useApiCall, handleApiError } from './services/api';
 
 // Import components
 import Sidebar from './components/Sidebar';
@@ -16,6 +17,7 @@ import AlertBanner from './components/AlertBanner';
 import SitesTable from './components/SitesTable';
 import Pagination from './components/Pagination';
 import RecommendationDetail from './components/RecommendationDetail';
+import CreateProjectModal from './components/CreateProjectModal';
 
 interface NavItem {
   id: string;
@@ -131,71 +133,69 @@ const Home: React.FC = () => {
     ]
   };
 
-  // Sample data
-  const websites = [
-    {
-      id: '1',
-      url: 'https://www.inthebox.io',
-      icon: 'fas fa-globe',
-      status: 'Active',
-      healthScore: 80,
-      recommendations: 17,
-      autoOptimize: true,
-      lastUpdated: '2 hours ago'
-    },
-    {
-      id: '2',
-      url: 'https://www.shop.sneakerspa.ng/',
-      icon: 'fas fa-shopping-cart',
-      status: 'Active',
-      healthScore: 76,
-      recommendations: 7,
-      autoOptimize: false,
-      lastUpdated: '1 day ago'
-    },
-    {
-      id: '3',
-      url: 'https://www.meditationoasis.com',
-      icon: 'fas fa-leaf',
-      status: 'Active',
-      healthScore: 96,
-      recommendations: 3,
-      autoOptimize: true,
-      lastUpdated: '3 hours ago'
-    },
-    {
-      id: '4',
-      url: 'https://www.art.ai',
-      icon: 'fas fa-palette',
-      status: 'Needs Attention',
-      healthScore: 68,
-      recommendations: 74,
-      autoOptimize: false,
-      lastUpdated: '5 hours ago'
-    }
+  // State for real data
+  const [websites, setWebsites] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Default data for when backend data is not available
+  const defaultPageStatuses = [
+    { type: 'healthy' as const, count: 0, label: 'Healthy Pages' },
+    { type: 'broken' as const, count: 0, label: 'Broken Pages' },
+    { type: 'issues' as const, count: 0, label: 'Have Issues' }
   ];
 
-  const pageStatuses = [
-    { type: 'healthy' as const, count: 3, label: 'Healthy Pages' },
-    { type: 'broken' as const, count: 1, label: 'Broken Pages' },
-    { type: 'issues' as const, count: 5, label: 'Have Issues' }
+  const defaultPerformanceData = [
+    { title: 'Technical SEO', score: 0 },
+    { title: 'Content & On-Page SEO', score: 0 },
+    { title: 'Performance & Core Web Vitals', score: 0 },
+    { title: 'Internal Linking & Site Architecture', score: 0 },
+    { title: 'Visual UX & Accessibility', score: 0 },
+    { title: 'Authority & Backlinks', score: 0 }
   ];
 
-  const performanceData = [
-    { title: 'Technical SEO', score: 85 },
-    { title: 'Content & On-Page SEO', score: 78 },
-    { title: 'Performance & Core Web Vitals', score: 75 },
-    { title: 'Internal Linking & Site Architecture', score: 92 },
-    { title: 'Visual UX & Accessibility', score: 76 },
-    { title: 'Authority & Backlinks', score: 78 }
-  ];
+  // Use real data or defaults
+  const pageStatuses = dashboardData?.page_statuses || defaultPageStatuses;
+  const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
 
   useEffect(() => {
     // Check if user is authenticated using the same key as Login component
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const user = localStorage.getItem('currentUser');
       if (user) {
         setCurrentUser(JSON.parse(user));
+        
+        // Fetch real data from backend
+        try {
+          setLoadingData(true);
+          setDataError(null);
+          
+          // Fetch projects and dashboard data in parallel
+          const [projectsResponse, dashboardResponse] = await Promise.all([
+            ApiService.getProjects(),
+            ApiService.getDashboardData()
+          ]);
+          
+          if (projectsResponse.success) {
+            setWebsites(projectsResponse.data || []);
+          } else {
+            setDataError('Failed to load projects');
+          }
+          
+          if (dashboardResponse.success) {
+            setDashboardData(dashboardResponse.data);
+          } else {
+            setDataError('Failed to load dashboard data');
+          }
+        } catch (err) {
+          const errorMessage = handleApiError(err);
+          setDataError(errorMessage);
+          console.error('Error loading data:', errorMessage);
+        } finally {
+          setLoadingData(false);
+        }
       }
       setLoading(false);
     };
@@ -289,6 +289,26 @@ const Home: React.FC = () => {
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleCreateProject = async (projectData: any) => {
+    try {
+      const response = await ApiService.createProject(projectData);
+      if (response.success) {
+        // Refresh the projects list
+        const projectsResponse = await ApiService.getProjects();
+        if (projectsResponse.success) {
+          setWebsites(projectsResponse.data || []);
+        }
+        setShowCreateModal(false);
+      } else {
+        throw new Error(response.error || 'Failed to create project');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setDataError(errorMessage);
+      console.error('Error creating project:', errorMessage);
+    }
   };
 
   if (loading) {
@@ -411,8 +431,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="dashboard-layout">
-
-
       <Sidebar 
         sidebarOpen={sidebarOpen}
         activePage={activePage}
@@ -426,53 +444,83 @@ const Home: React.FC = () => {
           <ProjectPage />
         ) : activePage === 'home' ? (
           <>
-            <Header userName={currentUser.name} userRole={currentUser.role} />
+            <Header userName={currentUser?.name || 'User'} userRole={currentUser?.role || 'user'} />
 
             {/* Dashboard Content */}
             <div className="dashboard-content">
-              {/* Search and New Project Section */}
-              <div className="search-section">
-                <div className="search-container">
-                  <i className="fas fa-search search-icon"></i>
-                  <input 
-                    type="text" 
-                    placeholder="Enter URL or Keyword" 
-                    className="search-input"
-                  />
+              {/* Loading State */}
+              {loadingData && (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>Loading your projects...</p>
                 </div>
-                <button className="new-project-btn">
-                  <i className="fas fa-plus"></i>
-                  New Project
-                </button>
-              </div>
+              )}
 
-              <AlertBanner
-                title="Low Site Health"
-                description="art.ai has a site health of only 68%. Please view recommendations now."
-                time="2 hours ago"
-                priority="High Priority"
-                progress={68}
-                onViewResults={() => handleViewResults(websites[3])}
-                onDismiss={() => console.log('Dismissed alert')}
-                onClose={() => console.log('Closed alert')}
-              />
+              {/* Error State */}
+              {dataError && !loadingData && (
+                <div className="error-container">
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <p>Error loading data: {dataError}</p>
+                    <button onClick={() => window.location.reload()}>Retry</button>
+                  </div>
+                </div>
+              )}
 
-              <SitesTable
-                websites={websites}
-                onViewResults={handleViewResults}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleAutoOptimize={handleToggleAutoOptimize}
-              />
+              {/* Content when data is loaded */}
+              {!loadingData && !dataError && (
+                <>
+                  {/* Search and New Project Section */}
+                  <div className="search-section">
+                    <div className="search-container">
+                      <i className="fas fa-search search-icon"></i>
+                      <input 
+                        type="text" 
+                        placeholder="Enter URL or Keyword" 
+                        className="search-input"
+                      />
+                    </div>
+                    <button 
+                      className="new-project-btn"
+                      onClick={() => setShowCreateModal(true)}
+                    >
+                      <i className="fas fa-plus"></i>
+                      New Project
+                    </button>
+                  </div>
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={1}
-                totalItems={websites.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-              />
+                  {/* Show alert only if there are websites with low health scores */}
+                  {websites.length > 0 && websites.some(site => site.healthScore < 70) && (
+                    <AlertBanner
+                      title="Low Site Health"
+                      description="Some sites have low health scores. Please review recommendations."
+                      time="Recently"
+                      priority="High Priority"
+                      progress={Math.min(...websites.map(site => site.healthScore))}
+                      onViewResults={() => handleViewResults(websites.find(site => site.healthScore < 70))}
+                      onDismiss={() => console.log('Dismissed alert')}
+                      onClose={() => console.log('Closed alert')}
+                    />
+                  )}
+
+                  <SitesTable
+                    websites={websites}
+                    onViewResults={handleViewResults}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleAutoOptimize={handleToggleAutoOptimize}
+                  />
+
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={1}
+                    totalItems={websites.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={handlePageChange}
+                    onItemsPerPageChange={handleItemsPerPageChange}
+                  />
+                </>
+              )}
             </div>
           </>
         ) : (
@@ -484,6 +532,13 @@ const Home: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onConfirm={handleCreateProject}
+      />
     </div>
   );
 };
