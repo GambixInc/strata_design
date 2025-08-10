@@ -7,26 +7,32 @@ import { useAuth } from './hooks/useAuth';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
-    const { login, isLoading, error, isAuthenticated } = useAuth();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Redirect if already authenticated
-    React.useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/dashboard', { replace: true });
-        }
-    }, [isAuthenticated, navigate]);
+    // Only check authentication when user actually tries to log in
+    // No automatic redirects on page load
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         
         try {
+            setLoading(true);
+            setError(null);
+            
+            // Try to log in
             await login(email, password);
+            
+            // If login successful, navigate to dashboard
             navigate('/dashboard', { replace: true });
         } catch (err: any) {
-            // Error is handled by the useAuth hook
             console.error('Login failed:', err);
+            setError(err.message || 'Login failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -61,8 +67,8 @@ const Login: React.FC = () => {
                         />
                     </div>
                     {error && <div className="error-message">{error}</div>}
-                    <button type="submit" className="login-btn" disabled={isLoading}>
-                        {isLoading ? 'Logging in...' : 'Login'}
+                    <button type="submit" className="login-btn" disabled={loading}>
+                        {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
                 <div className="login-footer">

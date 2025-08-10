@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import './Account.css';
 import Sidebar from './components/Sidebar';
+import ApiService, { handleApiError } from './services/api';
+
+import { useAuth } from './hooks/useAuth';
 
 interface UserProfile {
   firstName: string;
@@ -16,18 +19,21 @@ interface UserProfile {
 
 const Account: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('details');
   
   const [profile, setProfile] = useState<UserProfile>({
-    firstName: 'Oliva',
-    lastName: 'Rhye',
-    email: 'olivia@untitledui.com',
-    role: 'Product Designer',
-    company: 'Strata',
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'user',
+    company: '',
     photo: 'https://via.placeholder.com/60'
   });
 
   const [isDirty, setIsDirty] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -55,9 +61,38 @@ const Account: React.FC = () => {
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
-    // Here you would typically make an API call to save the profile
-    console.log('Saving profile:', profile);
-    setIsDirty(false);
+    try {
+      const response = await ApiService.updateUserProfile({
+        name: `${profile.firstName} ${profile.lastName}`,
+        preferences: {
+          company: profile.company,
+          role: profile.role
+        }
+      });
+      
+      if (response.success) {
+        setIsDirty(false);
+        // Update the profile with the response data
+        const updatedProfile = response.data;
+        if (updatedProfile) {
+          const [firstName, ...lastNameParts] = updatedProfile.name.split(' ');
+          setProfile(prev => ({
+            ...prev,
+            firstName: firstName || '',
+            lastName: lastNameParts.join(' ') || '',
+            email: updatedProfile.email || prev.email,
+            role: updatedProfile.role || prev.role,
+            company: updatedProfile.preferences?.company || prev.company
+          }));
+        }
+      } else {
+        throw new Error(response.error || 'Failed to update profile');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error('Error updating profile:', errorMessage);
+    }
   };
 
   const handleCancel = () => {
@@ -78,21 +113,79 @@ const Account: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Add logout logic here
-    navigate('/login');
+    logout();
   };
+
+  // Load user profile from backend
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      // Since this component is protected by ProtectedRoute, we can assume user is authenticated
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await ApiService.getUserProfile();
+        if (response.success && response.data) {
+          const userData = response.data;
+          const [firstName, ...lastNameParts] = userData.name.split(' ');
+          
+          setProfile({
+            firstName: firstName || '',
+            lastName: lastNameParts.join(' ') || '',
+            email: userData.email || '',
+            role: userData.role || 'user',
+            company: userData.preferences?.company || '',
+            photo: 'https://via.placeholder.com/60'
+          });
+        } else {
+          throw new Error(response.error || 'Failed to load profile');
+        }
+      } catch (err) {
+        const errorMessage = handleApiError(err);
+        setError(errorMessage);
+        console.error('Error loading profile:', errorMessage);
+        
+        // If it's an authentication error, let the auth system handle it
+        if (errorMessage.includes('Authentication required') || 
+            errorMessage.includes('Token expired') ||
+            errorMessage.includes('Invalid or expired token')) {
+          console.error('Authentication error:', errorMessage);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserProfile();
+  }, []);
 
   return (
     <div className="dashboard-container">
       <Sidebar
         userName={`${profile.firstName} ${profile.lastName}`}
-        userEmail={profile.email}
-        userAvatar={profile.photo}
         onLogout={handleLogout}
       />
 
       <main className="dashboard-main-content">
-        <form onSubmit={handleSave}>
+        {loading && (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading your profile...</p>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="error-container">
+            <div className="error-message">
+              <i className="fas fa-exclamation-triangle"></i>
+              <p>Error loading profile: {error}</p>
+              <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <form onSubmit={handleSave}>
           <header className="account-header">
             <h1>Account</h1>
             <div className="header-buttons">
@@ -234,6 +327,7 @@ const Account: React.FC = () => {
             <button type="submit" className="save-button" disabled={!isDirty}>Save</button>
           </footer>
         </form>
+        )}
       </main>
     </div>
   );

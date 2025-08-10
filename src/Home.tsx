@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
+import ApiService, { useApiCall, handleApiError } from './services/api';
+
+import { useAuth } from './hooks/useAuth';
 
 // Import components
 import Sidebar from './components/Sidebar';
@@ -16,6 +19,7 @@ import AlertBanner from './components/AlertBanner';
 import SitesTable from './components/SitesTable';
 import Pagination from './components/Pagination';
 import RecommendationDetail from './components/RecommendationDetail';
+import CreateProjectModal from './components/CreateProjectModal';
 
 interface NavItem {
   id: string;
@@ -33,7 +37,7 @@ interface Recommendation {
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -131,79 +135,120 @@ const Home: React.FC = () => {
     ]
   };
 
-  // Sample data
-  const websites = [
+  // State for real data
+  const [websites, setWebsites] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // ALL useEffect hooks must be called in the same order every time
+  // Fetch data from backend
+  useEffect(() => {
+    // Since this component is protected by ProtectedRoute, we can assume user is authenticated
+    // Just fetch the data from backend
+    const fetchData = async () => {
+      try {
+        setLoadingData(true);
+        setDataError(null);
+        
+        // Fetch projects and dashboard data in parallel
+        const [projectsResponse, dashboardResponse] = await Promise.all([
+          ApiService.getProjects(),
+          ApiService.getDashboardData()
+        ]);
+        
+        if (projectsResponse.success) {
+          setWebsites(projectsResponse.data || []);
+        } else {
+          // Backend error - will be handled in catch block
+          throw new Error('Failed to load projects');
+        }
+        
+        if (dashboardResponse.success) {
+          setDashboardData(dashboardResponse.data);
+        } else {
+          // Backend error - will be handled in catch block
+          throw new Error('Failed to load dashboard data');
+        }
+      } catch (err) {
+        const errorMessage = handleApiError(err);
+        console.error('Error loading data:', errorMessage);
+        
+        // Handle different types of errors
+        if (errorMessage.includes('Authentication required') || 
+            errorMessage.includes('Token expired') ||
+            errorMessage.includes('Invalid or expired token')) {
+          // Authentication error - let the auth system handle it
+          console.error('Authentication error:', errorMessage);
+        } else if (errorMessage.includes('500') || 
+                   errorMessage.includes('Failed to connect') ||
+                   errorMessage.includes('Network error')) {
+          // Backend/server error - show dashboard with demo data
+          console.warn('Backend error, showing dashboard with fallback data');
+          setWebsites(demoWebsites); // Use demo data instead of empty list
+          setDashboardData(null); // Will use default data
+          setDataError(null); // Don't show error, show dashboard instead
+        } else {
+          // Other errors (like 404, validation errors, etc.) - show empty state
+          console.warn('API error, showing empty state');
+          setWebsites([]); // Empty list for user with no projects
+          setDashboardData(null); // Will use default data
+          setDataError(null); // Don't show error, show empty state instead
+        }
+      } finally {
+        setLoadingData(false);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]); // Only fetch data when user is available
+
+  // Demo data for when backend is unavailable
+  const demoWebsites = [
     {
-      id: '1',
-      url: 'https://www.inthebox.io',
+      id: 'demo-1',
+      url: 'https://example.com',
       icon: 'fas fa-globe',
       status: 'Active',
-      healthScore: 80,
-      recommendations: 17,
+      healthScore: 85,
+      recommendations: 12,
       autoOptimize: true,
       lastUpdated: '2 hours ago'
     },
     {
-      id: '2',
-      url: 'https://www.shop.sneakerspa.ng/',
+      id: 'demo-2',
+      url: 'https://demo-site.com',
       icon: 'fas fa-shopping-cart',
-      status: 'Active',
-      healthScore: 76,
-      recommendations: 7,
+      status: 'Needs Attention',
+      healthScore: 65,
+      recommendations: 8,
       autoOptimize: false,
       lastUpdated: '1 day ago'
-    },
-    {
-      id: '3',
-      url: 'https://www.meditationoasis.com',
-      icon: 'fas fa-leaf',
-      status: 'Active',
-      healthScore: 96,
-      recommendations: 3,
-      autoOptimize: true,
-      lastUpdated: '3 hours ago'
-    },
-    {
-      id: '4',
-      url: 'https://www.art.ai',
-      icon: 'fas fa-palette',
-      status: 'Needs Attention',
-      healthScore: 68,
-      recommendations: 74,
-      autoOptimize: false,
-      lastUpdated: '5 hours ago'
     }
   ];
 
-  const pageStatuses = [
-    { type: 'healthy' as const, count: 3, label: 'Healthy Pages' },
-    { type: 'broken' as const, count: 1, label: 'Broken Pages' },
-    { type: 'issues' as const, count: 5, label: 'Have Issues' }
+  // Default data for when backend data is not available
+  const defaultPageStatuses = [
+    { type: 'healthy' as const, count: 0, label: 'Healthy Pages' },
+    { type: 'broken' as const, count: 0, label: 'Broken Pages' },
+    { type: 'issues' as const, count: 0, label: 'Have Issues' }
   ];
 
-  const performanceData = [
-    { title: 'Technical SEO', score: 85 },
-    { title: 'Content & On-Page SEO', score: 78 },
-    { title: 'Performance & Core Web Vitals', score: 75 },
-    { title: 'Internal Linking & Site Architecture', score: 92 },
-    { title: 'Visual UX & Accessibility', score: 76 },
-    { title: 'Authority & Backlinks', score: 78 }
+  const defaultPerformanceData = [
+    { title: 'Technical SEO', score: 0 },
+    { title: 'Content & On-Page SEO', score: 0 },
+    { title: 'Performance & Core Web Vitals', score: 0 },
+    { title: 'Internal Linking & Site Architecture', score: 0 },
+    { title: 'Visual UX & Accessibility', score: 0 },
+    { title: 'Authority & Backlinks', score: 0 }
   ];
 
-  useEffect(() => {
-    // Check if user is authenticated using the same key as Login component
-    const checkAuth = () => {
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        setCurrentUser(JSON.parse(user));
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, []);
-
-  // Remove the URL sync useEffect since we're using state-based navigation
+  // Use real data or defaults
+  const pageStatuses = dashboardData?.page_statuses || defaultPageStatuses;
+  const performanceData = dashboardData?.performance_breakdown || defaultPerformanceData;
 
   const handleNavigation = (navItem: NavItem) => {
     console.log('Navigating to:', navItem.id, 'Current activePage:', activePage);
@@ -231,8 +276,8 @@ const Home: React.FC = () => {
 
   const handleViewResults = (website: any) => {
     console.log('Viewing results for:', website.url);
-    setActivePage('project');
-    // Don't navigate - just update state
+    // Navigate to the new ProjectResults page with the website ID
+    navigate(`/project/${website.id}`);
   };
 
   const handleEdit = (website: any) => {
@@ -291,6 +336,33 @@ const Home: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const handleCreateProject = async (projectData: any) => {
+    try {
+      const response = await ApiService.createProject(projectData);
+      if (response.success) {
+        // Refresh the projects list
+        const projectsResponse = await ApiService.getProjects();
+        if (projectsResponse.success) {
+          setWebsites(projectsResponse.data || []);
+        }
+        setShowCreateModal(false);
+      } else {
+        throw new Error(response.error || 'Failed to create project');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setDataError(errorMessage);
+      console.error('Error creating project:', errorMessage);
+    }
+  };
+
+  const handleRetry = () => {
+    setDataError(null);
+    setRetryCount(0);
+    // Trigger a re-render to reload data
+    window.location.reload();
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -309,15 +381,19 @@ const Home: React.FC = () => {
     );
   }
 
-  // If user is not logged in, redirect to landing page
-  if (!currentUser) {
-    navigate('/');
-    return null;
+  // Show loading while user data is being fetched
+  if (!user) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading user data...</p>
+      </div>
+    );
   }
 
   // Debug: Log current state
   console.log('Current activePage:', activePage);
-  console.log('Current user:', currentUser);
+  console.log('Current user:', user);
 
   // Recommendation Detail Page
   if (activePage === 'recommendation' && currentRecommendation) {
@@ -331,6 +407,8 @@ const Home: React.FC = () => {
           activePage="project"
           onNavigation={handleNavigation}
           onToggleSidebar={handleToggleSidebar}
+          userName={user?.name || 'User'}
+          onLogout={logout}
         />
         <div className="main-content">
           <RecommendationDetail
@@ -360,7 +438,7 @@ const Home: React.FC = () => {
       <div className="project-page">
         <ProjectHeader 
           projectName="inthebox.io"
-          userName={currentUser.name}
+          userName={user.name}
           onBack={handleBackToHome}
         />
 
@@ -394,7 +472,7 @@ const Home: React.FC = () => {
           <div className="performance-section">
             <h2>Performance Breakdown</h2>
             <div className="performance-grid">
-              {performanceData.map((item, index) => (
+              {performanceData.map((item: any, index: number) => (
                 <PerformanceCard
                   key={index}
                   title={item.title}
@@ -411,13 +489,13 @@ const Home: React.FC = () => {
 
   return (
     <div className="dashboard-layout">
-
-
       <Sidebar 
         sidebarOpen={sidebarOpen}
         activePage={activePage}
         onNavigation={handleNavigation}
         onToggleSidebar={handleToggleSidebar}
+                    userName={user?.name || 'User'}
+        onLogout={logout}
       />
 
       {/* Main Content */}
@@ -426,53 +504,114 @@ const Home: React.FC = () => {
           <ProjectPage />
         ) : activePage === 'home' ? (
           <>
-            <Header userName={currentUser.name} userRole={currentUser.role} />
+            <Header userName={user?.name || 'User'} userRole={user?.role || 'user'} />
 
             {/* Dashboard Content */}
             <div className="dashboard-content">
-              {/* Search and New Project Section */}
-              <div className="search-section">
-                <div className="search-container">
-                  <i className="fas fa-search search-icon"></i>
-                  <input 
-                    type="text" 
-                    placeholder="Enter URL or Keyword" 
-                    className="search-input"
-                  />
+              {/* Loading State */}
+              {loadingData && (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>Loading your projects...</p>
                 </div>
-                <button className="new-project-btn">
-                  <i className="fas fa-plus"></i>
-                  New Project
-                </button>
-              </div>
+              )}
 
-              <AlertBanner
-                title="Low Site Health"
-                description="art.ai has a site health of only 68%. Please view recommendations now."
-                time="2 hours ago"
-                priority="High Priority"
-                progress={68}
-                onViewResults={() => handleViewResults(websites[3])}
-                onDismiss={() => console.log('Dismissed alert')}
-                onClose={() => console.log('Closed alert')}
-              />
+              {/* Error State - Only show for critical errors, not backend data errors */}
+              {dataError && !loadingData && (
+                <div className="error-container">
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <p>{dataError}</p>
+                    <button onClick={handleRetry}>Retry</button>
+                  </div>
+                </div>
+              )}
 
-              <SitesTable
-                websites={websites}
-                onViewResults={handleViewResults}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleAutoOptimize={handleToggleAutoOptimize}
-              />
+              {/* Content when data is loaded or when showing fallback data */}
+              {!loadingData && (
+                <>
+                  {/* Backend Status Notification */}
+                  {websites.length > 0 && websites.some(site => site.id.startsWith('demo-')) && !dataError && (
+                    <div className="backend-status-notification">
+                      <i className="fas fa-info-circle"></i>
+                      <span>Showing demo data - backend connection unavailable</span>
+                    </div>
+                  )}
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={1}
-                totalItems={websites.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-              />
+                  {/* Empty State for New Users */}
+                  {websites.length === 0 && !loadingData && !dataError && (
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <i className="fas fa-folder-open"></i>
+                      </div>
+                      <h3>No projects yet</h3>
+                      <p>Get started by creating your first project to monitor and optimize your website.</p>
+                      <button 
+                        className="create-first-project-btn"
+                        onClick={() => setShowCreateModal(true)}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Create Your First Project
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Dashboard Content - Only show when there are projects or demo data */}
+                  {websites.length > 0 && (
+                    <>
+                      {/* Search and New Project Section */}
+                      <div className="search-section">
+                        <div className="search-container">
+                          <i className="fas fa-search search-icon"></i>
+                          <input 
+                            type="text" 
+                            placeholder="Enter URL or Keyword" 
+                            className="search-input"
+                          />
+                        </div>
+                        <button 
+                          className="new-project-btn"
+                          onClick={() => setShowCreateModal(true)}
+                        >
+                          <i className="fas fa-plus"></i>
+                          New Project
+                        </button>
+                      </div>
+
+                      {/* Show alert only if there are websites with low health scores */}
+                      {websites.some(site => site.healthScore < 70) && (
+                        <AlertBanner
+                          title="Low Site Health"
+                          description="Some sites have low health scores. Please review recommendations."
+                          time="Recently"
+                          priority="High Priority"
+                          progress={Math.min(...websites.map(site => site.healthScore))}
+                          onViewResults={() => handleViewResults(websites.find(site => site.healthScore < 70))}
+                          onDismiss={() => console.log('Dismissed alert')}
+                          onClose={() => console.log('Closed alert')}
+                        />
+                      )}
+
+                      <SitesTable
+                        websites={websites}
+                        onViewResults={handleViewResults}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleAutoOptimize={handleToggleAutoOptimize}
+                      />
+
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={1}
+                        totalItems={websites.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </>
         ) : (
@@ -484,6 +623,13 @@ const Home: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onConfirm={handleCreateProject}
+      />
     </div>
   );
 };

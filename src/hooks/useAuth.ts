@@ -12,6 +12,7 @@ import {
   resendSignUpCode
 } from 'aws-amplify/auth';
 import ApiService from '../services/api';
+import { handleCognitoError } from '../utils/errorHandler';
 
 export interface User {
   id: string;
@@ -32,13 +33,37 @@ export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: true,
+    isLoading: false,
     error: null,
   });
 
-  // Check authentication status on mount
+  // Check authentication status on mount if there's a stored token
   useEffect(() => {
-    checkAuthStatus();
+    const token = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('currentUser');
+    
+    if (token && storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        // Clear invalid data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+        });
+      }
+    }
   }, []);
 
   const checkAuthStatus = useCallback(async () => {
@@ -70,6 +95,10 @@ export const useAuth = () => {
           error: null,
         });
       } else {
+        // Clear any stale data
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        
         setAuthState({
           user: null,
           isAuthenticated: false,
@@ -77,8 +106,13 @@ export const useAuth = () => {
           error: null,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auth check failed:', error);
+      
+      // Handle Cognito errors (including rate limiting)
+      handleCognitoError(error);
+      
+      // If we get here, it's not a Cognito error, so just clear state
       setAuthState({
         user: null,
         isAuthenticated: false,
@@ -126,6 +160,50 @@ export const useAuth = () => {
         throw new Error('Sign in incomplete. Please complete any required steps (MFA/verification).');
       }
     } catch (error: any) {
+      // Special case: "user is already signed in" is actually a success
+      if (error.message?.includes('There is already a signed in user') ||
+          error.message?.includes('already signed in') ||
+          error.name === 'AlreadySignedInException') {
+        // This is actually a success - user is authenticated
+        // Get the current session and user data
+        try {
+          const [attributes, session] = await Promise.all([
+            fetchUserAttributes(),
+            fetchAuthSession(),
+          ]);
+
+          if (session.tokens) {
+            const groups = session.tokens.accessToken.payload["cognito:groups"] as string[] | undefined;
+            
+            const user: User = {
+              id: attributes.sub || '',
+              email: attributes.email || '',
+              name: (attributes as any).name || attributes.email || '',
+              role: groups?.[0] || 'user',
+            };
+
+            // Store user and token
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            const token = session.tokens.accessToken.toString();
+            localStorage.setItem('authToken', token);
+
+            setAuthState({
+              user,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+
+            return { success: true, user };
+          }
+        } catch (sessionError) {
+          console.error('Error getting session for already signed in user:', sessionError);
+        }
+      }
+      
+      // Handle other Cognito errors (including rate limiting)
+      handleCognitoError(error);
+      
       const errorMessage = error.message || 'Login failed';
       setAuthState(prev => ({
         ...prev,

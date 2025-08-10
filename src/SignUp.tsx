@@ -4,11 +4,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
 import './SignUp.css';
-import { useRedirectIfSignedIn } from './hooks/useRedirectIfSignedIn';
+
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
-    useRedirectIfSignedIn('/');
     const [step, setStep] = useState(1); // 1 for sign up, 2 for confirmation
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
