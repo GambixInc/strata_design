@@ -37,8 +37,34 @@ export const useAuth = () => {
     error: null,
   });
 
-  // Don't automatically check authentication on mount
-  // Only check when explicitly requested (like during login)
+  // Check authentication status on mount if there's a stored token
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('currentUser');
+    
+    if (token && storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        // Clear invalid data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+        });
+      }
+    }
+  }, []);
 
   const checkAuthStatus = useCallback(async () => {
     try {

@@ -1,10 +1,11 @@
 
-10:35:07 PM [vite] (client) Re-optimizing dependencies because lockfil
-10:35:07 PM [vite] (client) Re-optimizing dependencies because lockfile has changed
 
-  VITE v7.0.3  ready in 388 ms
+  VITE v7.0.3  ready in 618 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
   ➜  press h + enter to show help
-10:38:58 PM [vite] (client) page reload dashboard.html
+11:24:39 AM [vite] (client) hmr update /style.css?direct, /src/App.tsx, /src/index.css, /src/Login.tsx, /src/components/ProtectedRoute.tsx, /src/
+11:24:39 AM [vite] (client) hmr update /style.css?direct, /src/App.tsx, /src/index.css, /src/Login.tsx, /src/components/ProtectedRoute.tsx, /src/ProjectResults.tsx, /src/Account.tsx, /src/Home.tsx
+11:24:53 AM [vite] (client) hmr update /style.css?direct, /src/App.tsx, /src/index.css, /src/Login.tsx, /src/components/ProtectedRoute.tsx, /src/
+11:24:53 AM [vite] (client) hmr update /style.css?direct, /src/App.tsx, /src/index.css, /src/Login.tsx, /src/components/ProtectedRoute.tsx, /src/ProjectResults.tsx, /src/Account.tsx, /src/Home.tsx (x2)git status
