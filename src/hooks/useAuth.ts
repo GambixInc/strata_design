@@ -134,7 +134,48 @@ export const useAuth = () => {
         throw new Error('Sign in incomplete. Please complete any required steps (MFA/verification).');
       }
     } catch (error: any) {
-      // Handle Cognito errors (including rate limiting)
+      // Special case: "user is already signed in" is actually a success
+      if (error.message?.includes('There is already a signed in user') ||
+          error.message?.includes('already signed in') ||
+          error.name === 'AlreadySignedInException') {
+        // This is actually a success - user is authenticated
+        // Get the current session and user data
+        try {
+          const [attributes, session] = await Promise.all([
+            fetchUserAttributes(),
+            fetchAuthSession(),
+          ]);
+
+          if (session.tokens) {
+            const groups = session.tokens.accessToken.payload["cognito:groups"] as string[] | undefined;
+            
+            const user: User = {
+              id: attributes.sub || '',
+              email: attributes.email || '',
+              name: (attributes as any).name || attributes.email || '',
+              role: groups?.[0] || 'user',
+            };
+
+            // Store user and token
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            const token = session.tokens.accessToken.toString();
+            localStorage.setItem('authToken', token);
+
+            setAuthState({
+              user,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+
+            return { success: true, user };
+          }
+        } catch (sessionError) {
+          console.error('Error getting session for already signed in user:', sessionError);
+        }
+      }
+      
+      // Handle other Cognito errors (including rate limiting)
       handleCognitoError(error);
       
       const errorMessage = error.message || 'Login failed';

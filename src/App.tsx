@@ -12,8 +12,14 @@ import { useAuth } from './hooks/useAuth';
 import ErrorPage from './ErrorPage'; // Error page
 import './App.css';
 
-// Component to show landing page - no automatic auth checking
+// Simple component: if user has token, go to dashboard, otherwise show landing
 const AuthenticatedRedirect: React.FC = () => {
+  const token = localStorage.getItem('authToken');
+  
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
   return <Landing />;
 };
 

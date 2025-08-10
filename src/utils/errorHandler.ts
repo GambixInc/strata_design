@@ -31,6 +31,16 @@ export const isAuthError = (error: any): boolean => {
 
 // Handle AWS Cognito errors specifically
 export const handleCognitoError = (error: any) => {
+  // Special case: "user is already signed in" is actually a success
+  if (error.message?.includes('There is already a signed in user') ||
+      error.message?.includes('already signed in') ||
+      error.name === 'AlreadySignedInException') {
+    // This is actually a success - user is authenticated
+    // Redirect to dashboard instead of error page
+    window.location.href = '/dashboard';
+    return;
+  }
+  
   if (isRateLimitError(error)) {
     redirectToError('auth', 'Rate limit exceeded. Please try again later.');
     return;
