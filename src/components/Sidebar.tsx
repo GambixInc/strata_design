@@ -29,13 +29,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const navigationItems: NavItem[] = [
     { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
-    { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
-    { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
+    // { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
+    // { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
   ];
 
   const bottomNavItems: NavItem[] = [
-    { id: 'support', label: 'Support', icon: 'fas fa-headset', path: '/support' },
-    { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
+    // { id: 'support', label: 'Support', icon: 'fas fa-headset', path: '/support' },
+    // { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
   ];
 
   const handleLogout = async () => {
@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* User Info Section - Removed duplicate email display */}
-      {userName && sidebarOpen && (
+      {/* {userName && sidebarOpen && (
         <div className="sidebar-user-info">
           <div className="user-avatar">
             <i className="fas fa-user"></i>
@@ -86,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="user-name">{userName}</div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Navigation */}
       <nav className="sidebar-nav">

@@ -24,7 +24,13 @@ export class ApiError extends Error {
 }
 
 // Base API configuration
-const API_BASE_URL = '/api';
+const getApiBaseUrl = (): string => {
+  // Use the environment variable for the backend URL
+  // This should point to your EC2 instance, e.g., http://your-ec2-ip:8080/api
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Check if token is expired
 const isTokenExpired = (token: string): boolean => {
@@ -92,6 +98,12 @@ async function apiRequest<T>(
         throw new ApiError('Authentication required. Please log in again.', response.status);
       }
       
+      // Handle backend unavailable (404, 502, 503, 504)
+      if (response.status === 404 || response.status === 502 || response.status === 503 || response.status === 504) {
+        console.warn(`Backend endpoint not available: ${url}`);
+        throw new ApiError('Backend service unavailable', response.status);
+      }
+      
       throw new ApiError(errorMessage, response.status);
     }
 
@@ -99,6 +111,13 @@ async function apiRequest<T>(
     const data = await response.json();
     return data;
   } catch (error) {
+    // Handle network errors (no backend available)
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.warn('Network error - backend may not be available:', error.message);
+      throw new ApiError('Backend service unavailable - network error', 0);
+    }
+    
+    // Re-throw ApiError instances
     if (error instanceof ApiError) {
       throw error;
     }
