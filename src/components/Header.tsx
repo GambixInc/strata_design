@@ -15,7 +15,17 @@ const Header: React.FC<HeaderProps> = ({ userName, userRole }) => {
         </div>
       </div>
       <div className="header-right">
-        <div className="header-actions">
+      {userName && userRole && (
+        <div className="sidebar-user-info">
+          <div className="user-avatar">
+            <i className="fas fa-user"></i>
+          </div>
+          <div className="user-details">
+            <div className="user-name">{userName}</div>
+          </div>
+        </div>
+      )}
+        {/* <div className="header-actions">
           <button className="notification-btn" aria-label="Notifications">
             <i className="fas fa-bell"></i>
             <span className="notification-badge">3</span>
@@ -34,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ userName, userRole }) => {
               <i className="fas fa-chevron-down"></i>
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </header>
   );

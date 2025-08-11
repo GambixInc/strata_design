@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* User Info Section - Removed duplicate email display */}
-      {userName && sidebarOpen && (
+      {/* {userName && sidebarOpen && (
         <div className="sidebar-user-info">
           <div className="user-avatar">
             <i className="fas fa-user"></i>
@@ -86,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="user-name">{userName}</div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Navigation */}
       <nav className="sidebar-nav">
