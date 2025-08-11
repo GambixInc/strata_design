@@ -29,8 +29,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const navigationItems: NavItem[] = [
     { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
-    { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
-    { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
+    // { id: 'project', label: 'Project', icon: 'fas fa-folder', path: '/project' },
+    // { id: 'team', label: 'Team', icon: 'fas fa-users', path: '/team' },
   ];
 
   const bottomNavItems: NavItem[] = [
