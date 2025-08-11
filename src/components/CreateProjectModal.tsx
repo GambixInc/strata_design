@@ -97,7 +97,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               />
             </div>
 
-            <div className="form-field">
+            {/* <div className="form-field">
               <label htmlFor="category">Website Category</label>
               <input
                 type="text"
@@ -107,9 +107,9 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 onChange={handleInputChange}
                 placeholder="e.g. Health Tech"
               />
-            </div>
+            </div> */}
 
-            <div className="form-field">
+            {/* <div className="form-field">
               <label htmlFor="description">About Website</label>
               <textarea
                 id="description"
@@ -119,7 +119,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 placeholder="Write a brief information about your website and goal"
                 rows={4}
               />
-            </div>
+            </div> */}
 
             <div className="modal-actions">
               <button
