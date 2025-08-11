@@ -72,7 +72,6 @@ web_modules/
 # dotenv environment variables file
 .env
 .env*.local
-.env.*
 
 # parcel-bundler cache files
 .cache
