@@ -34,8 +34,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const bottomNavItems: NavItem[] = [
-    { id: 'support', label: 'Support', icon: 'fas fa-headset', path: '/support' },
-    { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
+    // { id: 'support', label: 'Support', icon: 'fas fa-headset', path: '/support' },
+    // { id: 'settings', label: 'Settings', icon: 'fas fa-cog', path: '/settings' },
   ];
 
   const handleLogout = async () => {
