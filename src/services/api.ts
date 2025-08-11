@@ -25,12 +25,9 @@ export class ApiError extends Error {
 
 // Base API configuration
 const getApiBaseUrl = (): string => {
-  // In production, use the environment variable or default to relative path
-  if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_URL || '/api';
-  }
-  // In development, use localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+  // Use the environment variable for the backend URL
+  // This should point to your EC2 instance, e.g., http://your-ec2-ip:8080/api
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
