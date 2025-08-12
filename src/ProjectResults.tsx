@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { useAuth } from './hooks/useAuth';
+import ApiService from './services/api';
 
 import './ProjectResults.css';
 
@@ -38,67 +39,51 @@ const ProjectResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-
   useEffect(() => {
     const fetchProjectData = async () => {
       if (!id) return;
       
       try {
         setLoading(true);
-        // For now, we'll use demo data since the backend doesn't have this endpoint yet
-        // TODO: Replace with actual API call when backend endpoint is ready
-        // const projectData = await ApiService.getProjectResults(id);
+        setError(null);
         
-        // Demo data for now
-        const demoProject: ProjectData = {
-          id: id,
-          name: `Project ${id}`,
-          url: 'https://example.com',
-          status: 'Active',
-          healthScore: 78,
-          lastUpdated: new Date().toISOString(),
-          pages: [
-            {
-              id: '1',
-              url: 'https://example.com',
-              title: 'Homepage',
-              status: 'success',
-              loadTime: 1.2,
-              size: '245KB',
-              lastScraped: new Date().toISOString(),
-              issues: ['Missing alt text on 3 images', 'Slow loading time'],
-              recommendations: ['Optimize images', 'Enable compression']
-            },
-            {
-              id: '2',
-              url: 'https://example.com/about',
-              title: 'About Us',
-              status: 'success',
-              loadTime: 0.8,
-              size: '156KB',
-              lastScraped: new Date().toISOString(),
-              issues: ['Missing meta description'],
-              recommendations: ['Add meta description', 'Improve heading structure']
-            }
-          ],
-          recommendations: [
-            'Optimize image sizes for faster loading',
-            'Add missing alt text to images',
-            'Implement browser caching',
-            'Minimize CSS and JavaScript files',
-            'Use a CDN for static assets'
-          ],
-          alerts: [
-            'Site health score dropped by 5%',
-            '3 pages have accessibility issues',
-            'Mobile responsiveness needs improvement'
-          ]
-        };
+        // Fetch real project data from the backend
+        const response = await ApiService.getProjectResults(id);
         
-        setProject(demoProject);
-      } catch (err) {
-        setError('Failed to load project data');
+        if (response.success && response.data) {
+          const { project: projectData, pages, recommendations, health } = response.data;
+          
+          // Transform the backend data to match our frontend interface
+          const transformedProject: ProjectData = {
+            id: projectData.project_id || id,
+            name: projectData.name || `Project ${id}`,
+            url: projectData.domain || 'Unknown URL',
+            status: projectData.status || 'Active',
+            healthScore: health?.overall_score || 0,
+            lastUpdated: projectData.updated_at || new Date().toISOString(),
+            pages: pages.map((page: any) => ({
+              id: page.page_id || page.id,
+              url: page.page_url || page.url,
+              title: page.title || 'Untitled Page',
+              status: page.status || 'success',
+              loadTime: page.load_time || 0,
+              size: `${Math.round((page.word_count || 0) / 100)}KB`, // Rough estimate
+              lastScraped: page.last_crawled || new Date().toISOString(),
+              issues: page.issues || [],
+              recommendations: page.recommendations || []
+            })),
+            recommendations: recommendations.map((rec: any) => rec.description || rec.title || 'Recommendation'),
+            alerts: [] // Backend doesn't have alerts yet, so empty array
+          };
+          
+          setProject(transformedProject);
+        } else {
+          // If no data returned, show a message about no data available
+          setError('No project data available. This project may not have been scraped yet.');
+        }
+      } catch (err: any) {
         console.error('Error fetching project data:', err);
+        setError(err.message || 'Failed to load project data');
       } finally {
         setLoading(false);
       }
