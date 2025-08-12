@@ -189,7 +189,7 @@ export class ApiService {
   }
 
   static async deleteProject(projectId: string) {
-    return apiRequest<ApiResponse>(`/projects/${projectId}`, {
+    return apiRequest<ApiResponse>(`/gambix/projects/${projectId}`, {
       method: 'DELETE',
     });
   }

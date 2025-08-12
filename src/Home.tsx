@@ -284,8 +284,60 @@ const Home: React.FC = () => {
     console.log('Editing:', website.url);
   };
 
-  const handleDelete = (website: any) => {
-    console.log('Deleting:', website.url);
+  const handleDelete = async (website: any) => {
+    // Show confirmation dialog with more details
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${website.url}"?\n\n` +
+      `This will permanently remove:\n` +
+      `• All project data\n` +
+      `• Scraped pages\n` +
+      `• Recommendations\n` +
+      `• Health metrics\n\n` +
+      `This action cannot be undone.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+    
+    try {
+      // Show loading state (you could add a loading indicator here)
+      console.log('Deleting project...');
+      
+      const response = await ApiService.deleteProject(website.id);
+      
+      if (response.success) {
+        // Remove the project from the local state
+        setWebsites(prevWebsites => prevWebsites.filter(w => w.id !== website.id));
+        
+        // Show success message
+        console.log('Project deleted successfully');
+        
+        // Optional: Show a success notification
+        alert(`Project "${website.url}" has been deleted successfully.`);
+      } else {
+        throw new Error(response.error || 'Failed to delete project');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setDataError(errorMessage);
+      console.error('Error deleting project:', errorMessage);
+      
+      // Show specific error messages for different cases
+      if (errorMessage.includes('Project not found')) {
+        alert(`Project not found. It may have already been deleted.`);
+        // Refresh the projects list to sync with backend
+        const projectsResponse = await ApiService.getProjects();
+        if (projectsResponse.success) {
+          setWebsites(projectsResponse.data || []);
+        }
+      } else if (errorMessage.includes('Unauthorized')) {
+        alert(`You don't have permission to delete this project.`);
+      } else {
+        // Show generic error message
+        alert(`Failed to delete project: ${errorMessage}`);
+      }
+    }
   };
 
   const handleToggleAutoOptimize = (website: any) => {
@@ -579,7 +631,7 @@ const Home: React.FC = () => {
                       </div>
 
                       {/* Show alert only if there are websites with low health scores */}
-                      {websites.some(site => site.healthScore < 70) && (
+                      {/* {websites.some(site => site.healthScore < 70) && (
                         <AlertBanner
                           title="Low Site Health"
                           description="Some sites have low health scores. Please review recommendations."
@@ -590,7 +642,7 @@ const Home: React.FC = () => {
                           onDismiss={() => console.log('Dismissed alert')}
                           onClose={() => console.log('Closed alert')}
                         />
-                      )}
+                      )} */}
 
                       <SitesTable
                         websites={websites}
