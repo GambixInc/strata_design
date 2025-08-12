@@ -15,7 +15,6 @@ import KPICard from './components/KPICard';
 import SiteHealthCircle from './components/SiteHealthCircle';
 import CrawledPagesSummary from './components/CrawledPagesSummary';
 import PerformanceCard from './components/PerformanceCard';
-import AlertBanner from './components/AlertBanner';
 import SitesTable from './components/SitesTable';
 import Pagination from './components/Pagination';
 import RecommendationDetail from './components/RecommendationDetail';

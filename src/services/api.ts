@@ -235,34 +235,28 @@ export class ApiService {
     return apiRequest<ApiResponse<any>>(`/health/${siteId}`);
   }
 
-  // Project Results endpoint - combines multiple backend endpoints
+  // Project Results endpoint - gets scraped data from files
   static async getProjectResults(projectId: string) {
     try {
-      // Get project details, pages, recommendations, and health data
-      const [projectResponse, pagesResponse, recommendationsResponse, healthResponse] = await Promise.allSettled([
+      // Get project details and scraped data
+      const [projectResponse, scrapedDataResponse] = await Promise.allSettled([
         apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}`),
-        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/pages`),
-        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/recommendations`),
-        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/health`)
+        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/scraped-data`)
       ]);
 
       // Extract successful responses
       const project = projectResponse.status === 'fulfilled' ? projectResponse.value : null;
-      const pages = pagesResponse.status === 'fulfilled' ? pagesResponse.value : null;
-      const recommendations = recommendationsResponse.status === 'fulfilled' ? recommendationsResponse.value : null;
-      const health = healthResponse.status === 'fulfilled' ? healthResponse.value : null;
+      const scrapedData = scrapedDataResponse.status === 'fulfilled' ? scrapedDataResponse.value : null;
 
       // Check if we at least have the basic project info
       if (!project || !project.success) {
         throw new ApiError('Project not found', 404);
       }
 
-      // Combine all the data into a single response
+      // Combine project and scraped data
       const projectData = {
         project: project.data,
-        pages: pages?.data?.pages || [],
-        recommendations: recommendations?.data?.recommendations || [],
-        health: health?.data?.health_data || null
+        scrapedData: scrapedData?.data || { has_scraped_data: false }
       };
 
       return {
@@ -270,24 +264,8 @@ export class ApiService {
         data: projectData
       };
     } catch (error) {
-      // If any of the endpoints fail, return a basic project structure
-      console.warn('Some project data endpoints failed, returning basic structure:', error);
-      
-      // Try to get at least the basic project info
-      try {
-        const projectResponse = await apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}`);
-        return {
-          success: true,
-          data: {
-            project: projectResponse.data,
-            pages: [],
-            recommendations: [],
-            health: null
-          }
-        };
-      } catch (fallbackError) {
-        throw new ApiError('Failed to fetch project data', 500);
-      }
+      console.warn('Error fetching project data:', error);
+      throw new ApiError('Failed to fetch project data', 500);
     }
   }
 }

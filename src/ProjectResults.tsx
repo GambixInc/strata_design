@@ -30,11 +30,27 @@ interface ProjectData {
   lastUpdated: string;
 }
 
+interface ScrapedData {
+  has_scraped_data: boolean;
+  title: string;
+  original_url: string;
+  scraped_at: string;
+  seo_report: string;
+  word_count: number;
+  meta_description: string;
+  images_count: number;
+  links_count: number;
+  h1_tags: string[];
+  meta_tags: any;
+  stats: any;
+}
+
 const ProjectResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [project, setProject] = useState<ProjectData | null>(null);
+  const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -51,7 +67,7 @@ const ProjectResults: React.FC = () => {
         const response = await ApiService.getProjectResults(id);
         
         if (response.success && response.data) {
-          const { project: projectData, pages, recommendations, health } = response.data;
+          const { project: projectData, scrapedData } = response.data;
           
           // Transform the backend data to match our frontend interface
           const transformedProject: ProjectData = {
@@ -59,22 +75,25 @@ const ProjectResults: React.FC = () => {
             name: projectData.name || `Project ${id}`,
             url: projectData.domain || 'Unknown URL',
             status: projectData.status || 'Active',
-            healthScore: health?.overall_score || 0,
-            lastUpdated: projectData.updated_at || new Date().toISOString(),
-            pages: pages.map((page: any) => ({
-              id: page.page_id || page.id,
-              url: page.page_url || page.url,
-              title: page.title || 'Untitled Page',
-              status: page.status || 'success',
-              loadTime: page.load_time || 0,
-              size: `${Math.round((page.word_count || 0) / 100)}KB`, // Rough estimate
-              lastScraped: page.last_crawled || new Date().toISOString(),
-              issues: page.issues || [],
-              recommendations: page.recommendations || []
-            })),
-            recommendations: recommendations.map((rec: any) => rec.description || rec.title || 'Recommendation'),
-            alerts: [] // Backend doesn't have alerts yet, so empty array
+            healthScore: scrapedData.has_scraped_data ? Math.min(100, Math.max(0, 100 - (scrapedData.images_count * 5) - (scrapedData.word_count < 300 ? 20 : 0))) : 0,
+            lastUpdated: projectData.last_crawl || projectData.updated_at || new Date().toISOString(),
+            pages: scrapedData.has_scraped_data ? [{
+              id: 'main-page',
+              url: scrapedData.original_url || projectData.domain,
+              title: scrapedData.title || 'Untitled Page',
+              status: 'success',
+              loadTime: 0,
+              size: `${Math.round((scrapedData.word_count || 0) / 100)}KB`,
+              lastScraped: scrapedData.scraped_at || new Date().toISOString(),
+              issues: [],
+              recommendations: []
+            }] : [],
+            recommendations: scrapedData.has_scraped_data ? [] : [], // We'll display SEO report separately
+            alerts: []
           };
+          
+          // Store the full scraped data for display
+          setScrapedData(scrapedData);
           
           setProject(transformedProject);
         } else {
@@ -222,6 +241,15 @@ const ProjectResults: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {scrapedData && scrapedData.has_scraped_data && (
+            <div className="seo-report">
+              <h3>SEO Analysis Report</h3>
+              <div className="seo-report-content">
+                <pre>{scrapedData.seo_report}</pre>
+              </div>
+            </div>
+          )}
 
           <div className="seo-recommendations">
             <h3>Overall Recommendations</h3>
