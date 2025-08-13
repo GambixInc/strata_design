@@ -178,6 +178,36 @@
   margin-bottom: 0.25rem;
 }
 
+/* SEO Report */
+.seo-report {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.seo-report h3 {
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+.seo-report-content {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.seo-report-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #495057;
+}
+
 /* SEO Recommendations and Alerts */
 .seo-recommendations,
 .seo-alerts {

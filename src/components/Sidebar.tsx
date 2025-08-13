@@ -22,7 +22,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   activePage = 'home', 
   onNavigation, 
   onToggleSidebar,
-  userName,
   onLogout
 }) => {
   const navigate = useNavigate();

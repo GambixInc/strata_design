@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { useAuth } from './hooks/useAuth';
+import ApiService from './services/api';
 
 import './ProjectResults.css';
 
@@ -29,15 +30,30 @@ interface ProjectData {
   lastUpdated: string;
 }
 
+interface ScrapedData {
+  has_scraped_data: boolean;
+  title: string;
+  original_url: string;
+  scraped_at: string;
+  seo_report: string;
+  word_count: number;
+  meta_description: string;
+  images_count: number;
+  links_count: number;
+  h1_tags: string[];
+  meta_tags: any;
+  stats: any;
+}
+
 const ProjectResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [project, setProject] = useState<ProjectData | null>(null);
+  const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -45,60 +61,48 @@ const ProjectResults: React.FC = () => {
       
       try {
         setLoading(true);
-        // For now, we'll use demo data since the backend doesn't have this endpoint yet
-        // TODO: Replace with actual API call when backend endpoint is ready
-        // const projectData = await ApiService.getProjectResults(id);
+        setError(null);
         
-        // Demo data for now
-        const demoProject: ProjectData = {
-          id: id,
-          name: `Project ${id}`,
-          url: 'https://example.com',
-          status: 'Active',
-          healthScore: 78,
-          lastUpdated: new Date().toISOString(),
-          pages: [
-            {
-              id: '1',
-              url: 'https://example.com',
-              title: 'Homepage',
-              status: 'success',
-              loadTime: 1.2,
-              size: '245KB',
-              lastScraped: new Date().toISOString(),
-              issues: ['Missing alt text on 3 images', 'Slow loading time'],
-              recommendations: ['Optimize images', 'Enable compression']
-            },
-            {
-              id: '2',
-              url: 'https://example.com/about',
-              title: 'About Us',
-              status: 'success',
-              loadTime: 0.8,
-              size: '156KB',
-              lastScraped: new Date().toISOString(),
-              issues: ['Missing meta description'],
-              recommendations: ['Add meta description', 'Improve heading structure']
-            }
-          ],
-          recommendations: [
-            'Optimize image sizes for faster loading',
-            'Add missing alt text to images',
-            'Implement browser caching',
-            'Minimize CSS and JavaScript files',
-            'Use a CDN for static assets'
-          ],
-          alerts: [
-            'Site health score dropped by 5%',
-            '3 pages have accessibility issues',
-            'Mobile responsiveness needs improvement'
-          ]
-        };
+        // Fetch real project data from the backend
+        const response = await ApiService.getProjectResults(id);
         
-        setProject(demoProject);
-      } catch (err) {
-        setError('Failed to load project data');
+        if (response.success && response.data) {
+          const { project: projectData, scrapedData } = response.data;
+          
+          // Transform the backend data to match our frontend interface
+          const transformedProject: ProjectData = {
+            id: projectData.project_id || id,
+            name: projectData.name || `Project ${id}`,
+            url: projectData.domain || 'Unknown URL',
+            status: projectData.status || 'Active',
+            healthScore: scrapedData.has_scraped_data ? Math.min(100, Math.max(0, 100 - (scrapedData.images_count * 5) - (scrapedData.word_count < 300 ? 20 : 0))) : 0,
+            lastUpdated: projectData.last_crawl || projectData.updated_at || new Date().toISOString(),
+            pages: scrapedData.has_scraped_data ? [{
+              id: 'main-page',
+              url: scrapedData.original_url || projectData.domain,
+              title: scrapedData.title || 'Untitled Page',
+              status: 'success',
+              loadTime: 0,
+              size: `${Math.round((scrapedData.word_count || 0) / 100)}KB`,
+              lastScraped: scrapedData.scraped_at || new Date().toISOString(),
+              issues: [],
+              recommendations: []
+            }] : [],
+            recommendations: scrapedData.has_scraped_data ? [] : [], // We'll display SEO report separately
+            alerts: []
+          };
+          
+          // Store the full scraped data for display
+          setScrapedData(scrapedData);
+          
+          setProject(transformedProject);
+        } else {
+          // If no data returned, show a message about no data available
+          setError('No project data available. This project may not have been scraped yet.');
+        }
+      } catch (err: any) {
         console.error('Error fetching project data:', err);
+        setError(err.message || 'Failed to load project data');
       } finally {
         setLoading(false);
       }
@@ -237,6 +241,15 @@ const ProjectResults: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {scrapedData && scrapedData.has_scraped_data && (
+            <div className="seo-report">
+              <h3>SEO Analysis Report</h3>
+              <div className="seo-report-content">
+                <pre>{scrapedData.seo_report}</pre>
+              </div>
+            </div>
+          )}
 
           <div className="seo-recommendations">
             <h3>Overall Recommendations</h3>

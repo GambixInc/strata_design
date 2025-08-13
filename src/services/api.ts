@@ -189,7 +189,7 @@ export class ApiService {
   }
 
   static async deleteProject(projectId: string) {
-    return apiRequest<ApiResponse>(`/projects/${projectId}`, {
+    return apiRequest<ApiResponse>(`/gambix/projects/${projectId}`, {
       method: 'DELETE',
     });
   }
@@ -233,6 +233,40 @@ export class ApiService {
 
   static async getSiteHealth(siteId: string) {
     return apiRequest<ApiResponse<any>>(`/health/${siteId}`);
+  }
+
+  // Project Results endpoint - gets scraped data from files
+  static async getProjectResults(projectId: string) {
+    try {
+      // Get project details and scraped data
+      const [projectResponse, scrapedDataResponse] = await Promise.allSettled([
+        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}`),
+        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/scraped-data`)
+      ]);
+
+      // Extract successful responses
+      const project = projectResponse.status === 'fulfilled' ? projectResponse.value : null;
+      const scrapedData = scrapedDataResponse.status === 'fulfilled' ? scrapedDataResponse.value : null;
+
+      // Check if we at least have the basic project info
+      if (!project || !project.success) {
+        throw new ApiError('Project not found', 404);
+      }
+
+      // Combine project and scraped data
+      const projectData = {
+        project: project.data,
+        scrapedData: scrapedData?.data || { has_scraped_data: false }
+      };
+
+      return {
+        success: true,
+        data: projectData
+      };
+    } catch (error) {
+      console.warn('Error fetching project data:', error);
+      throw new ApiError('Failed to fetch project data', 500);
+    }
   }
 }
 
