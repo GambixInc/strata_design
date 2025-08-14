@@ -85,8 +85,10 @@ export const useAuth = () => {
         localStorage.setItem('currentUser', JSON.stringify(user));
         
         // Store auth token for API calls
-        const token = session.tokens.accessToken.toString();
-        localStorage.setItem('authToken', token);
+        const token = session.tokens.idToken?.toString();
+        if (token) {
+          localStorage.setItem('authToken', token);
+        }
 
         setAuthState({
           user,
@@ -145,8 +147,10 @@ export const useAuth = () => {
 
         // Store user and token
         localStorage.setItem('currentUser', JSON.stringify(user));
-        const token = session.tokens.accessToken.toString();
-        localStorage.setItem('authToken', token);
+        const token = session.tokens.idToken?.toString();
+        if (token) {
+          localStorage.setItem('authToken', token);
+        }
 
         setAuthState({
           user,
@@ -184,8 +188,10 @@ export const useAuth = () => {
 
             // Store user and token
             localStorage.setItem('currentUser', JSON.stringify(user));
-            const token = session.tokens.accessToken.toString();
-            localStorage.setItem('authToken', token);
+            const token = session.tokens.idToken?.toString();
+            if (token) {
+              localStorage.setItem('authToken', token);
+            }
 
             setAuthState({
               user,

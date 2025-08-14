@@ -111,6 +111,66 @@ const ProjectResults: React.FC = () => {
     fetchProjectData();
   }, [id]);
 
+  const handleDebugFiles = async () => {
+    if (!id) return;
+    
+    try {
+      const response = await fetch(`/api/debug/project/${id}/files`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Debug info:', data.data);
+        alert(`Debug Info:\n\nPath: ${data.data.scraped_files_path}\nExists: ${data.data.path_exists}\nFiles: ${data.data.files.join(', ')}\n\nCheck console for full details.`);
+      } else {
+        alert(`Debug failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Debug error:', error);
+      alert('Debug request failed. Check console for details.');
+    }
+  };
+
+  const handleRescrape = async () => {
+    if (!id) return;
+    
+    if (!confirm('This will re-scrape the website. This may take a few moments. Continue?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`/api/gambix/projects/${id}/rescraper`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Project re-scraped successfully! Refreshing page...');
+        // Reload the page to show the new data
+        window.location.reload();
+      } else {
+        alert(`Re-scrape failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Re-scrape error:', error);
+      alert('Re-scrape request failed. Check console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNavigation = (navItem: any) => {
     navigate(navItem.path);
   };
@@ -166,9 +226,34 @@ const ProjectResults: React.FC = () => {
             <i className="fas fa-exclamation-triangle"></i>
             <h2>Error Loading Project</h2>
             <p>{error || 'Project not found'}</p>
-            <button onClick={() => navigate('/dashboard')} className="btn-primary">
-              Back to Dashboard
-            </button>
+            
+            {error && error.includes('No project data available') && (
+              <div className="error-help">
+                <h4>Possible Solutions:</h4>
+                <ul>
+                  <li>The project may not have been scraped yet</li>
+                  <li>The scraped files may have been moved or deleted</li>
+                  <li>There may be a file path issue</li>
+                </ul>
+                <p>Try clicking the "Debug Files" button below to diagnose the issue.</p>
+              </div>
+            )}
+            
+            <div className="error-actions">
+              <button onClick={() => navigate('/dashboard')} className="btn-primary">
+                Back to Dashboard
+              </button>
+              {id && (
+                <>
+                  <button onClick={handleDebugFiles} className="btn-secondary">
+                    Debug Files
+                  </button>
+                  <button onClick={handleRescrape} className="btn-secondary">
+                    Re-scrape Project
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -195,6 +280,11 @@ const ProjectResults: React.FC = () => {
           </button>
           <h1>SEO Scraped Data - {project.name}</h1>
           <p className="project-url">{project.url}</p>
+          {id && (
+            <button onClick={handleRescrape} className="btn-secondary" style={{ marginLeft: '1rem' }}>
+              Re-scrape Project
+            </button>
+          )}
         </div>
 
         {/* Simple SEO Data Display */}
