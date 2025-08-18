@@ -10,7 +10,7 @@ The application now includes integration with an AWS Lambda function for website
 
 1. **Environment Variable**: Add your Lambda URL to your `.env` file:
    ```
-   VITE_LAMBDA_URL=https://your-lambda-url.lambda-url.us-east-1.on.aws/
+   CRAWLER_FUNC_URL=https://your-lambda-url.lambda-url.us-east-1.on.aws/
    ```
 
 2. **Lambda Function**: The Lambda function should accept a `url` parameter and return JSON data in the format shown in the image.
@@ -115,7 +115,7 @@ The application now includes integration with an AWS Lambda function for website
 - ❌ **No testing framework** - no unit/integration tests
 
 #### **2. Environment Configuration**
-- ✅ **Lambda URL configuration** - `VITE_LAMBDA_URL` environment variable
+- ✅ **Lambda URL configuration** - `CRAWLER_FUNC_URL` environment variable
 - ❌ **Missing other environment variables** - need proper .env setup
 
 #### **2. Production Readiness**
