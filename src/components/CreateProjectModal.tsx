@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import './CreateProjectModal.css';
+import { ApiService } from '../services/api';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ProjectData {
   websiteUrl: string;
   category: string;
   description: string;
+  scrapedData?: any; // Optional scraped data from lambda
 }
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
@@ -41,16 +43,32 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     setIsLoading(true);
     try {
-      await onConfirm(formData);
-      // Reset form after successful submission
-      setFormData({
-        websiteUrl: '',
-        category: '',
-        description: ''
-      });
-      onClose();
+      // Call the lambda function to scrape the website
+      const lambdaResponse = await ApiService.callLambdaScraper(formData.websiteUrl);
+      
+      if (lambdaResponse.success) {
+        // Pass the scraped data along with the original form data to the parent
+        const projectDataWithScrapedData = {
+          ...formData,
+          scrapedData: lambdaResponse.data
+        };
+        
+        await onConfirm(projectDataWithScrapedData);
+        
+        // Reset form after successful submission
+        setFormData({
+          websiteUrl: '',
+          category: '',
+          description: ''
+        });
+        onClose();
+      } else {
+        throw new Error('Failed to scrape website data');
+      }
     } catch (error) {
       console.error('Error creating project:', error);
+      // You might want to show an error message to the user here
+      alert('Error scraping website. Please check the URL and try again.');
     } finally {
       setIsLoading(false);
     }

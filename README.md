@@ -4,12 +4,50 @@ A React-based web application for SEO and website optimization platform with AWS
 
 ## 🚀 Current Status
 
+### 🔧 **Lambda Integration Setup**
+
+The application now includes integration with an AWS Lambda function for website scraping. To set this up:
+
+1. **Environment Variable**: Add your Lambda URL to your `.env` file:
+   ```
+   VITE_LAMBDA_URL=https://your-lambda-url.lambda-url.us-east-1.on.aws/
+   ```
+
+2. **Lambda Function**: The Lambda function should accept a `url` parameter and return JSON data in the format shown in the image.
+
+3. **Usage**: When creating a new project, the application will:
+   - Call the Lambda function with the provided website URL
+   - Display the scraped data in a modal
+   - Allow users to review the data before proceeding
+
+**Lambda Response Format Expected:**
+```json
+[
+  {
+    "url": "https://example.com/",
+    "title": "Website Title",
+    "description": "Website description",
+    "keywords": "keyword1, keyword2, keyword3",
+    "content": "Extracted website content...",
+    "links": ["https://link1.com", "https://link2.com"],
+    "content_length": 1234,
+    "links_count": 5,
+    "status_code": 200,
+    "content_type": "text/html; charset=utf-8",
+    "scraped_at": 1755539903.4485178,
+    "scraper_version": "2.0",
+    "scraper_features": ["anti-bot-protection", "realistic-headers"]
+  }
+]
+```
+
 ### ✅ **What's Working:**
 - **Authentication Flow** - AWS Cognito integration with clean login/logout
 - **Routing System** - React Router with protected routes
 - **UI Components** - Modern, responsive design with Tailwind CSS
 - **Error Handling** - Dedicated error pages for different error types
 - **Project Structure** - Well-organized component architecture
+- **Lambda Integration** - Website scraping via AWS Lambda function
 
 ### 🚨 **Critical Missing Components:**
 
@@ -75,6 +113,10 @@ A React-based web application for SEO and website optimization platform with AWS
 - ❌ **No TypeScript strict mode** - type safety issues
 - ❌ **No ESLint/Prettier** - code quality issues
 - ❌ **No testing framework** - no unit/integration tests
+
+#### **2. Environment Configuration**
+- ✅ **Lambda URL configuration** - `VITE_LAMBDA_URL` environment variable
+- ❌ **Missing other environment variables** - need proper .env setup
 
 #### **2. Production Readiness**
 - ❌ **No environment configuration** - hardcoded URLs

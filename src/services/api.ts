@@ -1,6 +1,7 @@
 // src/services/api.ts
 
 import { redirectToError } from '../utils/errorHandler';
+import { config } from '../config/environment';
 
 // API Response Types
 export interface ApiResponse<T = any> {
@@ -171,10 +172,48 @@ export class ApiService {
   }
 
   static async createProject(projectData: { websiteUrl: string; category: string; description: string }) {
+    console.log('projectData', projectData);
     return apiRequest<ApiResponse<any>>('/projects', {
       method: 'POST',
       body: JSON.stringify(projectData),
     });
+  }
+
+  // Lambda function to scrape website data
+  static async callLambdaScraper(url: string) {
+    if (!config.lambda.url) {
+      throw new ApiError('Lambda URL not configured', 500);
+    }
+
+    try {
+      const lambdaUrl = `${config.lambda.url}?url=${encodeURIComponent(url)}`;
+      console.log('Calling lambda URL:', lambdaUrl);
+      
+      const response = await fetch(lambdaUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new ApiError(`Lambda request failed: ${response.status} ${response.statusText}`, response.status);
+      }
+
+      const data = await response.json();
+      console.log('Lambda response:', data);
+      
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('Lambda call error:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(`Lambda call failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
+    }
   }
 
   static async getProject(projectId: string) {

@@ -8,6 +8,11 @@ export const config = {
     timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '30000'),
   },
   
+  // Lambda Configuration
+  lambda: {
+    url: import.meta.env.VITE_LAMBDA_URL,
+  },
+  
   // AWS Amplify Configuration
   aws: {
     userPoolId: import.meta.env.VITE_AWS_USER_POOLS_ID,
