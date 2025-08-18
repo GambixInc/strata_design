@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateProjectModal.css';
 import { ApiService } from '../services/api';
 
@@ -21,6 +22,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   onClose,
   onConfirm
 }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<ProjectData>({
     websiteUrl: '',
     category: '',
@@ -47,15 +49,12 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       const lambdaResponse = await ApiService.callLambdaScraper(formData.websiteUrl);
       
       if (lambdaResponse.success) {
-        // Pass the scraped data along with the original form data to the parent
-        const projectDataWithScrapedData = {
-          ...formData,
-          scrapedData: lambdaResponse.data
-        };
+        // Navigate to the lambda results page with the scraped data
+        navigate('/lambda-results', { 
+          state: { scrapedData: lambdaResponse.data } 
+        });
         
-        await onConfirm(projectDataWithScrapedData);
-        
-        // Reset form after successful submission
+        // Reset form and close modal
         setFormData({
           websiteUrl: '',
           category: '',

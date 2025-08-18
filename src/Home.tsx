@@ -19,7 +19,6 @@ import SitesTable from './components/SitesTable';
 import Pagination from './components/Pagination';
 import RecommendationDetail from './components/RecommendationDetail';
 import CreateProjectModal from './components/CreateProjectModal';
-import LambdaDataDisplay from './components/LambdaDataDisplay';
 
 interface NavItem {
   id: string;
@@ -141,8 +140,6 @@ const Home: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [lambdaData, setLambdaData] = useState<any>(null);
-  const [showLambdaData, setShowLambdaData] = useState(false);
 
 
   // ALL useEffect hooks must be called in the same order every time
@@ -184,15 +181,23 @@ const Home: React.FC = () => {
             errorMessage.includes('Invalid or expired token')) {
           // Authentication error - let the auth system handle it
           console.error('Authentication error:', errorMessage);
-        } else if (errorMessage.includes('500') || 
-                   errorMessage.includes('Failed to connect') ||
-                   errorMessage.includes('Network error')) {
-          // Backend/server error - show dashboard with demo data
-          console.warn('Backend error, showing dashboard with fallback data');
-          setWebsites(demoWebsites); // Use demo data instead of empty list
-          setDashboardData(null); // Will use default data
-          setDataError(null); // Don't show error, show dashboard instead
-        } else {
+                 } else if (errorMessage.includes('500') || 
+                    errorMessage.includes('Failed to connect') ||
+                    errorMessage.includes('Network error')) {
+           // Backend/server error - show dashboard with fallback data
+           console.warn('Backend error, showing dashboard with fallback data');
+           
+           // Try to load projects from localStorage first
+           const localProjects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+           if (localProjects.length > 0) {
+             setWebsites(localProjects);
+           } else {
+             setWebsites(demoWebsites); // Use demo data if no local projects
+           }
+           
+           setDashboardData(null); // Will use default data
+           setDataError(null); // Don't show error, show dashboard instead
+         } else {
           // Other errors (like 404, validation errors, etc.) - show empty state
           console.warn('API error, showing empty state');
           setWebsites([]); // Empty list for user with no projects
@@ -391,34 +396,9 @@ const Home: React.FC = () => {
   };
 
   const handleCreateProject = async (projectData: any) => {
-    try {
-      console.log('Creating project with data:', projectData);
-      
-      // If we have scraped data from lambda, show it to the user
-      if (projectData.scrapedData) {
-        console.log('Scraped data received:', projectData.scrapedData);
-        setLambdaData(projectData.scrapedData);
-        setShowLambdaData(true);
-        // Don't close the modal yet, let user see the data first
-        return;
-      }
-      
-      const response = await ApiService.createProject(projectData);
-      if (response.success) {
-        // Refresh the projects list
-        const projectsResponse = await ApiService.getProjects();
-        if (projectsResponse.success) {
-          setWebsites(projectsResponse.data || []);
-        }
-        setShowCreateModal(false);
-      } else {
-        throw new Error(response.error || 'Failed to create project');
-      }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setDataError(errorMessage);
-      console.error('Error creating project:', errorMessage);
-    }
+    // This function is no longer used since we redirect to LambdaResults page
+    // Keeping it for compatibility but it won't be called
+    console.log('handleCreateProject called but not used');
   };
 
   const handleRetry = () => {
@@ -428,11 +408,7 @@ const Home: React.FC = () => {
     window.location.reload();
   };
 
-  const handleLambdaDataClose = () => {
-    setShowLambdaData(false);
-    setLambdaData(null);
-    setShowCreateModal(false);
-  };
+
 
   if (loading) {
     return (
@@ -700,13 +676,6 @@ const Home: React.FC = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onConfirm={handleCreateProject}
-      />
-
-      {/* Lambda Data Display Modal */}
-      <LambdaDataDisplay
-        data={lambdaData}
-        isVisible={showLambdaData}
-        onClose={handleLambdaDataClose}
       />
     </div>
   );

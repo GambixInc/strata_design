@@ -72,7 +72,7 @@ const LambdaDataDisplay: React.FC<LambdaDataDisplayProps> = ({ data, isVisible, 
 
           <div className="modal-actions">
             <button className="btn-confirm" onClick={onClose}>
-              Close
+              Create Project
             </button>
           </div>
         </div>

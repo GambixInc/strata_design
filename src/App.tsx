@@ -7,6 +7,7 @@ import Scraper from './Scraper'; // Scraper tool page
 import Account from './Account'; // Account page
 import SignUp from './SignUp'; // SignUp page
 import ProjectResults from './ProjectResults'; // Project results page
+import LambdaResults from './LambdaResults'; // Lambda results page
 import ProtectedRoute from './components/ProtectedRoute';
 
 import ErrorPage from './ErrorPage'; // Error page
@@ -51,6 +52,7 @@ function App() {
             <ProjectResults />
           </ProtectedRoute>
         } />
+        <Route path="/lambda-results" element={<LambdaResults />} />
         <Route path="/error" element={<ErrorPage />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>

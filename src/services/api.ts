@@ -181,19 +181,20 @@ export class ApiService {
 
   // Lambda function to scrape website data
   static async callLambdaScraper(url: string) {
-    if (!config.lambda.url) {
-      throw new ApiError('Lambda URL not configured', 500);
+    if (!config.lambda.url || config.lambda.url === 'https://your-lambda-url.lambda-url.us-east-1.on.aws/') {
+      throw new ApiError('Lambda URL not configured. Please set VITE_CRAWLER_FUNC_URL in your .env file.', 500);
     }
 
     try {
       const lambdaUrl = `${config.lambda.url}?url=${encodeURIComponent(url)}`;
-      console.log('Calling lambda URL:', lambdaUrl);
+      console.log('Calling lambda URL directly:', lambdaUrl);
       
       const response = await fetch(lambdaUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -209,6 +210,14 @@ export class ApiService {
       };
     } catch (error) {
       console.error('Lambda call error:', error);
+      
+      // Handle CORS errors specifically
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.warn('CORS error detected. This might be due to lambda CORS configuration.');
+        // Try to provide more helpful error message
+        throw new ApiError('Network error: Unable to reach the lambda function. This might be due to CORS configuration or network issues.', 0);
+      }
+      
       if (error instanceof ApiError) {
         throw error;
       }
