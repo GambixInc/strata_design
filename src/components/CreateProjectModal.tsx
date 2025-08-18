@@ -45,10 +45,14 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     setIsLoading(true);
     try {
+      console.log('Starting lambda call for URL:', formData.websiteUrl);
       // Call the lambda function to scrape the website
       const lambdaResponse = await ApiService.callLambdaScraper(formData.websiteUrl);
       
       if (lambdaResponse.success) {
+        console.log('Lambda response successful:', lambdaResponse);
+        console.log('Scraped data to pass:', lambdaResponse.data);
+        
         // Navigate to the lambda results page with the scraped data
         navigate('/lambda-results', { 
           state: { scrapedData: lambdaResponse.data } 
@@ -66,6 +70,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       }
     } catch (error) {
       console.error('Error creating project:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        type: error?.constructor?.name || 'Unknown type'
+      });
       // You might want to show an error message to the user here
       alert('Error scraping website. Please check the URL and try again.');
     } finally {
