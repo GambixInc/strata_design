@@ -1,265 +1,189 @@
 # Strata Design - Frontend Application
 
-A React-based web application for SEO and website optimization platform with AWS Cognito authentication.
+A React-based web application for website analysis and optimization using a unified AWS Lambda API for all operations.
 
-## 🚀 Current Status
+## What's Working
 
-### 🔧 **Lambda Integration Setup**
+- ✅ User authentication and authorization
+- ✅ Protected routes and navigation
+- ✅ Dashboard with project overview
+- ✅ Project creation and management using unified Lambda API
+- ✅ Website scraping via Lambda functions
+- ✅ Project persistence via Lambda API (DynamoDB)
+- ✅ Responsive design and modern UI
 
-The application now includes integration with an AWS Lambda function for website scraping. To set this up:
+## Environment Configuration
 
-1. **Environment Variable**: Add your Lambda URL to your `.env` file:
-   ```
-   CRAWLER_FUNC_URL=https://your-lambda-url.lambda-url.us-east-1.on.aws/
-   ```
+Create a `.env` file in the root directory with the following variables:
 
-2. **Lambda Function**: The Lambda function should accept a `url` parameter and return JSON data in the format shown in the image.
+```env
+# AWS Amplify Configuration
+VITE_AWS_USER_POOLS_ID=your-user-pool-id
+VITE_AWS_USER_POOLS_WEB_CLIENT_ID=your-client-id
+VITE_AWS_REGION=us-east-1
 
-3. **Usage**: When creating a new project, the application will:
-   - Call the Lambda function with the provided website URL
-   - Display the scraped data in a modal
-   - Allow users to review the data before proceeding
+# Unified Lambda Function URL for All Operations
+VITE_CRAWLER_FUNC_URL=https://your-lambda-function-url.lambda-url.us-east-1.on.aws/
 
-**Lambda Response Format Expected:**
+# Optional: Analytics and Debug
+VITE_ENABLE_ANALYTICS=false
+VITE_DEBUG_MODE=true
+```
+
+## Unified Lambda API Architecture
+
+The application uses a single Lambda function for all operations:
+
+### **Lambda Function** - For All Operations
+- **Purpose**: Website scraping, project creation, project retrieval, and data persistence
+- **Environment Variable**: `VITE_CRAWLER_FUNC_URL`
+- **Usage**: Single endpoint for all project operations
+
+### **API Modes:**
+1. **Create New Scrape** - When `url` and `user_id` are provided
+2. **Get User Projects** - When only `user_id` is provided
+
+## Lambda Integration Setup
+
+The frontend integrates with a unified AWS Lambda API that handles:
+
+1. **Environment Variable**: Set `VITE_CRAWLER_FUNC_URL` to your Lambda function URL
+2. **Dual-Mode API**: Automatically detects whether to scrape or retrieve projects
+3. **Data Persistence**: Automatically saves scraped data to DynamoDB
+4. **Project Management**: Retrieves user projects from DynamoDB
+
+### Expected Lambda Response Formats:
+
+**Mode 1: Create New Scrape Response**
 ```json
 [
   {
-    "url": "https://example.com/",
-    "title": "Website Title",
-    "description": "Website description",
-    "keywords": "keyword1, keyword2, keyword3",
-    "content": "Extracted website content...",
-    "links": ["https://link1.com", "https://link2.com"],
-    "content_length": 1234,
-    "links_count": 5,
-    "status_code": 200,
-    "content_type": "text/html; charset=utf-8",
-    "scraped_at": 1755539903.4485178,
-    "scraper_version": "2.0",
-    "scraper_features": ["anti-bot-protection", "realistic-headers"]
+    "url": "https://example.com",
+    "title": "Example Website",
+    "content": "Website content...",
+    "project_id": "proj_1755608050_30e172ad",
+    "saved_to_dynamodb": true,
+    "scraped_at": 1755608050,
+    "curl_info": {
+      "status_code": 200,
+      "response_time_ms": 245.67
+    },
+    "framework_detection": {
+      "bootstrap": true,
+      "wordpress": false
+    }
   }
 ]
 ```
 
-### ✅ **What's Working:**
-- **Authentication Flow** - AWS Cognito integration with clean login/logout
-- **Routing System** - React Router with protected routes
-- **UI Components** - Modern, responsive design with Tailwind CSS
-- **Error Handling** - Dedicated error pages for different error types
-- **Project Structure** - Well-organized component architecture
-- **Lambda Integration** - Website scraping via AWS Lambda function
-
-### 🚨 **Critical Missing Components:**
-
-#### **1. Backend API Integration**
-- ❌ **No real backend endpoints** - API service calls dummy endpoints
-- ❌ **Missing project results endpoint** - ProjectResults uses demo data
-- ❌ **No actual data persistence** - everything is mock data
-
-**Required API Endpoints:**
-```typescript
-// Missing endpoints that need to be implemented:
-- POST /api/projects (create project)
-- GET /api/projects/:id/results (get project results)
-- POST /api/scrape (actual scraping)
-- POST /api/optimize (actual optimization)
-- GET /api/user/profile (real user data)
-- PUT /api/user/profile (update user data)
+**Mode 2: Get User Projects Response**
+```json
+{
+  "mode": "retrieve",
+  "user_id": "user123",
+  "projects": [
+    {
+      "user_id": "user123",
+      "project_id": "proj_1755608050_30e172ad",
+      "url": "https://example.com",
+      "scraped_at": 1755608050,
+      "status": "success",
+      "scrape_data": {
+        "url": "https://example.com",
+        "title": "Example Website",
+        "content": "Website content...",
+        "curl_info": {
+          "status_code": 200,
+          "response_time_ms": 245.67
+        }
+      }
+    }
+  ],
+  "count": 1
+}
 ```
 
-#### **2. Authentication Issues**
-- ❌ **Conflicting auth systems** - `useRedirectIfSignedIn` still does aggressive checking
-- ❌ **SignUp component** uses old auth pattern that conflicts with new flow
-- ❌ **Duplicate auth utilities** - both `utils/auth.ts` and `hooks/useAuth.ts`
+## How It Works
 
-#### **3. Missing Core Features**
-- ❌ **No real project creation** - CreateProjectModal doesn't connect to backend
-- ❌ **No actual scraping functionality** - Scraper component calls dummy endpoints
-- ❌ **No user profile management** - Account page doesn't save real data
+### **Project Creation Flow:**
+1. User enters a website URL in the Create Project modal
+2. Frontend calls Lambda with `url` and `user_id` parameters
+3. Lambda scrapes the website and automatically saves to DynamoDB
+4. Lambda returns scrape results with `project_id` and `saved_to_dynamodb` flag
+5. Frontend redirects to dashboard to show the new project
 
-### 🔧 **Missing Backend Endpoints:**
+### **Dashboard Data:**
+- Projects are loaded by calling Lambda with only `user_id`
+- Lambda retrieves all user projects from DynamoDB
+- Dashboard metrics are calculated from the retrieved project data
 
-**Required API Endpoints:**
-```typescript
-// Missing endpoints that need to be implemented:
-- POST /api/projects (create project)
-- GET /api/projects/:id/results (get project results)
-- POST /api/scrape (actual scraping)
-- POST /api/optimize (actual optimization)
-- GET /api/user/profile (real user data)
-- PUT /api/user/profile (update user data)
-```
+### **Data Persistence:**
+- All project data is automatically saved to DynamoDB by the Lambda function
+- Data persists across all devices and sessions
+- Real-time synchronization between users
 
-### 🎯 **Missing Frontend Features:**
+## Development
 
-#### **1. Data Management**
-- ❌ **No real state management** - no Redux/Context for global state
-- ❌ **No data caching** - API calls aren't optimized
-- ❌ **No offline support** - app breaks without backend
-
-#### **2. User Experience**
-- ❌ **No loading states** in many components
-- ❌ **No error boundaries** - app crashes on errors
-- ❌ **No form validation** - basic HTML validation only
-
-#### **3. Navigation & Routing**
-- ❌ **No breadcrumbs** - users can get lost
-- ❌ **No route guards** - some routes aren't properly protected
-- ❌ **No 404 page** - missing route handling
-
-### 🛠️ **Missing Infrastructure:**
-
-#### **1. Development Tools**
-- ❌ **No TypeScript strict mode** - type safety issues
-- ❌ **No ESLint/Prettier** - code quality issues
-- ❌ **No testing framework** - no unit/integration tests
-
-#### **2. Environment Configuration**
-- ✅ **Lambda URL configuration** - `CRAWLER_FUNC_URL` environment variable
-- ❌ **Missing other environment variables** - need proper .env setup
-
-#### **2. Production Readiness**
-- ❌ **No environment configuration** - hardcoded URLs
-- ❌ **No build optimization** - no code splitting
-- ❌ **No PWA features** - no service workers
-
-### 📱 **Missing UI/UX Elements:**
-
-#### **1. Responsive Design**
-- ❌ **Incomplete mobile support** - some components not mobile-friendly
-- ❌ **No touch gestures** - mobile interaction missing
-
-#### **2. Accessibility**
-- ❌ **No ARIA labels** - screen reader support missing
-- ❌ **No keyboard navigation** - accessibility issues
-
-### 🔒 **Security Gaps:**
-
-#### **1. Frontend Security**
-- ❌ **No CSRF protection** - vulnerable to attacks
-- ❌ **No input sanitization** - XSS vulnerabilities
-- ❌ **No rate limiting** - frontend can spam API
-
-#### **2. Data Protection**
-- ❌ **Sensitive data in localStorage** - security risk
-- ❌ **No data encryption** - user data exposed
-
-## 🎯 **Priority Fixes Needed:**
-
-### **High Priority:**
-1. **Remove conflicting auth systems** - clean up `useRedirectIfSignedIn`
-2. **Implement real backend endpoints** - replace dummy data
-3. **Fix authentication flow** - ensure consistent behavior
-4. **Add proper error handling** - implement error boundaries
-
-### **Medium Priority:**
-1. **Add form validation** - improve user experience
-2. **Implement loading states** - better UX
-3. **Add TypeScript strict mode** - improve code quality
-4. **Create 404 page** - handle missing routes
-
-### **Low Priority:**
-1. **Add testing framework** - ensure reliability
-2. **Implement PWA features** - modern web app features
-3. **Add accessibility features** - inclusive design
-4. **Optimize performance** - code splitting, caching
-
-## 🏗️ **Project Structure**
-
-```
-strata_design/
-├── src/
-│   ├── components/          # Reusable UI components
-│   ├── hooks/              # Custom React hooks
-│   ├── services/           # API services
-│   ├── utils/              # Utility functions
-│   ├── App.tsx             # Main app component
-│   ├── Home.tsx            # Dashboard page
-│   ├── Login.tsx           # Login page
-│   ├── SignUp.tsx          # Sign up page
-│   ├── Account.tsx         # User account page
-│   ├── Scraper.tsx         # Web scraper tool
-│   ├── ProjectResults.tsx  # Project results page
-│   ├── ErrorPage.tsx       # Error handling page
-│   └── Landing.tsx         # Landing page
-```
-
-## 🔐 **Authentication Flow**
-
-### **Current Implementation:**
-- **AWS Cognito** for user authentication
-- **JWT tokens** stored in localStorage
-- **Protected routes** with automatic redirects
-- **Error handling** for rate limiting and auth failures
-
-### **Flow:**
-1. User visits landing page (no auth check)
-2. User clicks "Login" → goes to login page
-3. User enters credentials → clicks "Login"
-4. System validates with AWS Cognito
-5. Success → redirect to dashboard
-6. Failure → show error page
-
-## 🚀 **Getting Started**
-
-### **Prerequisites:**
-- Node.js (v16 or higher)
-- npm or yarn
-- AWS Cognito setup
-
-### **Installation:**
 ```bash
-cd strata_design
+# Install dependencies
 npm install
-```
 
-### **Development:**
-```bash
+# Start development server
 npm run dev
-```
 
-### **Build:**
-```bash
+# Build for production
 npm run build
+
+# Preview production build
+npm run preview
 ```
 
-## 🔧 **Configuration**
+## Project Structure
 
-### **Environment Variables:**
-Create a `.env` file in the root directory:
-```env
-VITE_AWS_REGION=us-east-1
-VITE_USER_POOL_ID=your-user-pool-id
-VITE_USER_POOL_WEB_CLIENT_ID=your-client-id
-VITE_API_BASE_URL=http://localhost:8080/api
+```
+src/
+├── components/          # Reusable UI components
+├── config/             # Configuration files
+├── hooks/              # Custom React hooks
+├── services/           # Unified Lambda API integrations
+├── utils/              # Utility functions
+├── App.tsx            # Main application component
+├── Home.tsx           # Dashboard page
+├── LambdaResults.tsx  # Lambda scraping results page
+└── main.tsx           # Application entry point
 ```
 
-## 📝 **Development Notes**
+## Troubleshooting
 
-### **Current Issues:**
-1. **Backend Integration** - All API calls return mock data
-2. **Authentication Conflicts** - Multiple auth systems running
-3. **Missing Features** - Core functionality not implemented
-4. **Error Handling** - Incomplete error boundaries
+### Lambda CORS Issues
+If you encounter CORS errors when calling the Lambda function:
 
-### **Next Steps:**
-1. **Clean up authentication** - Remove conflicting systems
-2. **Implement backend integration** - Replace mock data with real API calls
-3. **Add missing features** - Complete core functionality
-4. **Improve error handling** - Add proper error boundaries
+1. **Check Lambda CORS Configuration**:
+   - Ensure your Lambda function returns proper CORS headers
+   - Add `Access-Control-Allow-Origin: *` to Lambda response headers
+   - Include `Access-Control-Allow-Methods: GET, POST, OPTIONS`
 
-## 🤝 **Contributing**
+2. **Frontend Debugging**:
+   - Check browser console for specific error messages
+   - Verify environment variables are set correctly
+   - Ensure the Lambda URL is accessible
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Environment Variables
+- All environment variables must be prefixed with `VITE_` for Vite to expose them
+- Restart the development server after changing environment variables
+- Check the browser console for "not configured" errors
 
-## 📄 **License**
+### API Usage
+- **To scrape a website**: Send `url` + `user_id` to Lambda
+- **To get user projects**: Send only `user_id` to Lambda
+- **user_id is always required** for all operations
 
-This project is licensed under the MIT License.
+## Features
 
----
-
-**Note:** This is a work-in-progress application. Many features are currently using mock data and need backend integration to be fully functional.
+- **Website Analysis**: Scrape and analyze website data using Lambda functions
+- **Project Management**: Create, view, and manage website projects via unified Lambda API
+- **Dashboard**: Overview of project health and performance metrics
+- **Responsive Design**: Works on desktop and mobile devices
+- **Authentication**: Secure user authentication with AWS Cognito
+- **Data Persistence**: Real-time data storage and retrieval via Lambda API (DynamoDB)
+- **Unified API**: Single Lambda endpoint for all operations

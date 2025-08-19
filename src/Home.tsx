@@ -152,10 +152,10 @@ const Home: React.FC = () => {
         setLoadingData(true);
         setDataError(null);
         
-        // Fetch projects and dashboard data in parallel
+        // Fetch projects and dashboard data in parallel using the unified Lambda API
         const [projectsResponse, dashboardResponse] = await Promise.all([
-          ApiService.getProjects(),
-          ApiService.getDashboardData()
+          ApiService.getProjects('default_user'), // You can replace with actual user ID from auth
+          ApiService.getDashboardData('default_user') // You can replace with actual user ID from auth
         ]);
         
         if (projectsResponse.success) {
@@ -291,40 +291,15 @@ const Home: React.FC = () => {
     console.log('Editing:', website.url);
   };
 
-  const handleDelete = async (website: any) => {
-    // Show confirmation dialog with more details
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${website.url}"?\n\n` +
-      `This will permanently remove:\n` +
-      `• All project data\n` +
-      `• Scraped pages\n` +
-      `• Recommendations\n` +
-      `• Health metrics\n\n` +
-      `This action cannot be undone.`
-    );
-    
-    if (!confirmed) {
-      return;
-    }
-    
+  const handleDeleteProject = async (website: any) => {
     try {
       // Show loading state (you could add a loading indicator here)
       console.log('Deleting project...');
       
-      const response = await ApiService.deleteProject(website.id);
+      // Note: Project deletion is not supported in the current Lambda API
+      // This would need to be implemented on the backend
+      throw new Error('Project deletion not supported in current API');
       
-      if (response.success) {
-        // Remove the project from the local state
-        setWebsites(prevWebsites => prevWebsites.filter(w => w.id !== website.id));
-        
-        // Show success message
-        console.log('Project deleted successfully');
-        
-        // Optional: Show a success notification
-        alert(`Project "${website.url}" has been deleted successfully.`);
-      } else {
-        throw new Error(response.error || 'Failed to delete project');
-      }
     } catch (err) {
       const errorMessage = handleApiError(err);
       setDataError(errorMessage);
@@ -334,12 +309,14 @@ const Home: React.FC = () => {
       if (errorMessage.includes('Project not found')) {
         alert(`Project not found. It may have already been deleted.`);
         // Refresh the projects list to sync with backend
-        const projectsResponse = await ApiService.getProjects();
+        const projectsResponse = await ApiService.getProjects('default_user');
         if (projectsResponse.success) {
           setWebsites(projectsResponse.data || []);
         }
       } else if (errorMessage.includes('Unauthorized')) {
         alert(`You don't have permission to delete this project.`);
+      } else if (errorMessage.includes('not supported')) {
+        alert(`Project deletion is not currently supported.`);
       } else {
         // Show generic error message
         alert(`Failed to delete project: ${errorMessage}`);
@@ -643,7 +620,7 @@ const Home: React.FC = () => {
                         websites={websites}
                         onViewResults={handleViewResults}
                         onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onDelete={handleDeleteProject}
                         onToggleAutoOptimize={handleToggleAutoOptimize}
                       />
 

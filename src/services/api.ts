@@ -24,14 +24,12 @@ export class ApiError extends Error {
   }
 }
 
-// Base API configuration
-const getApiBaseUrl = (): string => {
-  // Use the environment variable for the backend URL
-  // This should point to your EC2 instance, e.g., http://your-ec2-ip:8080/api
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// Lambda URL configuration
+const getLambdaUrl = (): string => {
+  return config.lambda?.url || 'https://your-lambda-url.lambda-url.us-east-1.on.aws/';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+const LAMBDA_URL = getLambdaUrl();
 
 // Check if token is expired
 const isTokenExpired = (token: string): boolean => {
@@ -67,20 +65,63 @@ const getDefaultHeaders = (): HeadersInit => {
   return headers;
 };
 
-// Generic API request function
-async function apiRequest<T>(
-  endpoint: string,
-  options: RequestInit = {}
+// Generic Lambda request function
+async function lambdaRequest<T>(
+  params: Record<string, any> = {},
+  method: 'GET' | 'POST' = 'POST'
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const config: RequestInit = {
-    headers: getDefaultHeaders(),
-    ...options,
+  if (!config.lambda.url || config.lambda.url === 'https://your-lambda-url.lambda-url.us-east-1.on.aws/') {
+    throw new ApiError('Lambda URL not configured. Please set VITE_CRAWLER_FUNC_URL in your .env file.', 500);
+  }
+
+  let url = LAMBDA_URL;
+  let body: string | undefined;
+
+  if (method === 'GET') {
+    // For GET requests, add parameters to URL
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, String(value));
+      }
+    });
+    url += `?${searchParams.toString()}`;
+  } else {
+    // For POST requests, send parameters in body
+    body = JSON.stringify(params);
+  }
+
+  console.log('Lambda Request:', {
+    url,
+    method,
+    params,
+    body
+  });
+
+  const requestConfig: RequestInit = {
+    method,
+    headers: {
+      ...getDefaultHeaders(),
+      'Accept': 'application/json',
+      'Origin': window.location.origin,
+    },
+    mode: 'cors',
+    credentials: 'omit',
   };
 
+  if (body) {
+    requestConfig.body = body;
+  }
+
   try {
-    const response = await fetch(url, config);
+    const response = await fetch(url, requestConfig);
+    
+    console.log('Lambda Response:', {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
     
     // Handle non-2xx responses
     if (!response.ok) {
@@ -101,8 +142,8 @@ async function apiRequest<T>(
       
       // Handle backend unavailable (404, 502, 503, 504)
       if (response.status === 404 || response.status === 502 || response.status === 503 || response.status === 504) {
-        console.warn(`Backend endpoint not available: ${url}`);
-        throw new ApiError('Backend service unavailable', response.status);
+        console.warn(`Lambda endpoint not available: ${url}`);
+        throw new ApiError('Lambda service unavailable', response.status);
       }
       
       throw new ApiError(errorMessage, response.status);
@@ -112,10 +153,16 @@ async function apiRequest<T>(
     const data = await response.json();
     return data;
   } catch (error) {
-    // Handle network errors (no backend available)
+    console.error('Lambda Request Error:', {
+      url,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      type: error instanceof TypeError ? 'TypeError' : 'Other'
+    });
+    
+    // Handle network errors (no lambda available)
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      console.warn('Network error - backend may not be available:', error.message);
-      throw new ApiError('Backend service unavailable - network error', 0);
+      console.warn('Network error - lambda may not be available:', error.message);
+      throw new ApiError('Lambda service unavailable - network error', 0);
     }
     
     // Re-throw ApiError instances
@@ -135,177 +182,270 @@ async function apiRequest<T>(
 export class ApiService {
   // Authentication endpoints
   static async login(credentials: { email: string; password: string }) {
-    return apiRequest<ApiResponse<{ token: string; user: any }>>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
+    return lambdaRequest<ApiResponse<{ token: string; user: any }>>({
+      ...credentials,
+      action: 'login'
     });
   }
 
   static async register(userData: { email: string; password: string; name: string }) {
-    return apiRequest<ApiResponse<{ token: string; user: any }>>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
+    return lambdaRequest<ApiResponse<{ token: string; user: any }>>({
+      ...userData,
+      action: 'register'
     });
   }
 
   static async logout() {
-    return apiRequest<ApiResponse>('/auth/logout', {
-      method: 'POST',
+    return lambdaRequest<ApiResponse>({
+      action: 'logout'
     });
   }
 
   // User profile endpoints
   static async getUserProfile() {
-    return apiRequest<ApiResponse<any>>('/user/profile');
+    return lambdaRequest<ApiResponse<any>>({
+      action: 'getUserProfile'
+    });
   }
 
   static async updateUserProfile(profileData: any) {
-    return apiRequest<ApiResponse<any>>('/user/profile', {
-      method: 'PUT',
-      body: JSON.stringify(profileData),
+    return lambdaRequest<ApiResponse<any>>({
+      ...profileData,
+      action: 'updateUserProfile'
     });
   }
 
-  // Project endpoints
-  static async getProjects() {
-    return apiRequest<ApiResponse<any[]>>('/projects');
-  }
-
-  static async createProject(projectData: { websiteUrl: string; category: string; description: string }) {
-    console.log('projectData', projectData);
-    return apiRequest<ApiResponse<any>>('/projects', {
-      method: 'POST',
-      body: JSON.stringify(projectData),
-    });
-  }
-
-  // Lambda function to scrape website data
-  static async callLambdaScraper(url: string) {
-    if (!config.lambda.url || config.lambda.url === 'https://your-lambda-url.lambda-url.us-east-1.on.aws/') {
-      throw new ApiError('Lambda URL not configured. Please set VITE_CRAWLER_FUNC_URL in your .env file.', 500);
-    }
-
+  // Project endpoints - Using Lambda for all project operations
+  static async getProjects(userId: string = 'default_user') {
     try {
-      const lambdaUrl = `${config.lambda.url}?url=${encodeURIComponent(url)}`;
-      console.log('Calling lambda URL directly:', lambdaUrl);
-      
-      const response = await fetch(lambdaUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
+      const response = await lambdaRequest<{ mode: string; user_id: string; projects: any[]; count: number }>({
+        user_id: userId
       });
-
-      if (!response.ok) {
-        throw new ApiError(`Lambda request failed: ${response.status} ${response.statusText}`, response.status);
-      }
-
-      const data = await response.json();
-      console.log('Lambda response:', data);
+      
+      console.log('Projects fetched from Lambda:', response);
       
       return {
         success: true,
-        data: data
+        data: response.projects || []
       };
     } catch (error) {
-      console.error('Lambda call error:', error);
-      
-      // Handle CORS errors specifically
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.warn('CORS error detected. This might be due to lambda CORS configuration.');
-        // Try to provide more helpful error message
-        throw new ApiError('Network error: Unable to reach the lambda function. This might be due to CORS configuration or network issues.', 0);
-      }
+      console.error('Error fetching projects:', error);
       
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError(`Lambda call failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
+      throw new ApiError(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
     }
   }
 
-  static async getProject(projectId: string) {
-    return apiRequest<ApiResponse<any>>(`/projects/${projectId}`);
+  static async createProject(projectData: {
+    websiteUrl: string;
+    category?: string;
+    description?: string;
+    userId?: string;
+  }) {
+    try {
+      console.log('Creating project with Lambda:', projectData);
+      
+      // Call Lambda to scrape and save project
+      const response = await lambdaRequest<any[]>([
+        {
+          url: projectData.websiteUrl,
+          user_id: projectData.userId || 'default_user',
+          retries: 3
+        }
+      ]);
+      
+      console.log('Project created via Lambda:', response);
+      
+      // The Lambda returns an array with one object containing the scrape results
+      const scrapeResult = response[0];
+      
+      if (!scrapeResult || !scrapeResult.saved_to_dynamodb) {
+        throw new ApiError('Failed to save project to database', 500);
+      }
+      
+      return {
+        success: true,
+        data: scrapeResult
+      };
+    } catch (error) {
+      console.error('Error creating project:', error);
+      
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
+    }
   }
 
-  static async updateProject(projectId: string, projectData: any) {
-    return apiRequest<ApiResponse<any>>(`/projects/${projectId}`, {
-      method: 'PUT',
-      body: JSON.stringify(projectData),
+  // Legacy method for backward compatibility - now uses the new unified API
+  static async callLambdaScraper(url: string, userId: string = 'default_user') {
+    return this.createProject({
+      websiteUrl: url,
+      userId: userId
     });
   }
 
-  static async deleteProject(projectId: string) {
-    return apiRequest<ApiResponse>(`/gambix/projects/${projectId}`, {
-      method: 'DELETE',
+  static async getProject(projectId: string, userId: string = 'default_user') {
+    try {
+      // Get all projects and find the specific one
+      const projectsResponse = await this.getProjects(userId);
+      
+      if (!projectsResponse.success) {
+        throw new ApiError('Failed to fetch projects', 500);
+      }
+      
+      const project = projectsResponse.data.find((p: any) => p.project_id === projectId);
+      
+      if (!project) {
+        throw new ApiError('Project not found', 404);
+      }
+      
+      return {
+        success: true,
+        data: project
+      };
+    } catch (error) {
+      console.error('Error fetching project:', error);
+      
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(`Failed to fetch project: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
+    }
+  }
+
+  static async updateProject(projectId: string, projectData: any, userId: string = 'default_user') {
+    // Note: The Lambda API doesn't support updating projects directly
+    // This would need to be implemented on the backend if needed
+    throw new ApiError('Project updates not supported in current API', 501);
+  }
+
+  static async deleteProject(projectId: string, userId: string = 'default_user') {
+    // Note: The Lambda API doesn't support deleting projects directly
+    // This would need to be implemented on the backend if needed
+    throw new ApiError('Project deletion not supported in current API', 501);
+  }
+
+  // Analytics endpoints
+  static async getAnalytics(siteId: string) {
+    return lambdaRequest<ApiResponse<any>>({
+      action: 'getAnalytics',
+      siteId
     });
-  }
-
-  // Scraping endpoints
-  static async scrapeWebsite(url: string) {
-    return apiRequest<ApiResponse<any>>('/scrape', {
-      method: 'POST',
-      body: JSON.stringify({ url }),
-    });
-  }
-
-  static async optimizeWebsite(url: string, userProfile: string) {
-    return apiRequest<ApiResponse<any>>('/optimize', {
-      method: 'POST',
-      body: JSON.stringify({ url, user_profile: userProfile }),
-    });
-  }
-
-  static async getFiles() {
-    return apiRequest<ApiResponse<any>>('/files');
-  }
-
-  // Analytics and SEO endpoints
-  static async getSiteAnalytics(siteId: string) {
-    return apiRequest<ApiResponse<any>>(`/analytics/site/${siteId}`);
   }
 
   static async getSeoMetrics(siteId: string) {
-    return apiRequest<ApiResponse<any>>(`/seo/metrics/${siteId}`);
+    return lambdaRequest<ApiResponse<any>>({
+      action: 'getSeoMetrics',
+      siteId
+    });
   }
 
   static async getRecommendations(siteId: string) {
-    return apiRequest<ApiResponse<any[]>>(`/recommendations/${siteId}`);
+    return lambdaRequest<ApiResponse<any[]>>({
+      action: 'getRecommendations',
+      siteId
+    });
   }
 
-  // Dashboard endpoints
-  static async getDashboardData() {
-    return apiRequest<ApiResponse<any>>('/dashboard');
+  // Dashboard endpoints - Using Lambda data
+  static async getDashboardData(userId: string = 'default_user') {
+    try {
+      const projectsResponse = await this.getProjects(userId);
+      
+      if (!projectsResponse.success) {
+        throw new ApiError('Failed to fetch projects for dashboard', 500);
+      }
+      
+      const projects = projectsResponse.data || [];
+      
+      // Calculate dashboard metrics from projects
+      const totalProjects = projects.length;
+      const activeProjects = projects.filter((p: any) => p.status === 'success').length;
+      const averageHealthScore = projects.length > 0 
+        ? projects.reduce((sum: number, p: any) => {
+            const score = p.scrape_data?.curl_info?.status_code === 200 ? 85 : 65;
+            return sum + score;
+          }, 0) / projects.length 
+        : 0;
+      
+      const dashboardData = {
+        total_projects: totalProjects,
+        active_projects: activeProjects,
+        average_health_score: Math.round(averageHealthScore),
+        page_statuses: [
+          { type: 'healthy', count: activeProjects, label: 'Healthy Pages' },
+          { type: 'broken', count: 0, label: 'Broken Pages' },
+          { type: 'issues', count: totalProjects - activeProjects, label: 'Have Issues' }
+        ],
+        performance_breakdown: [
+          { title: 'Technical SEO', score: Math.round(averageHealthScore) },
+          { title: 'Content & On-Page SEO', score: Math.round(averageHealthScore * 0.9) },
+          { title: 'Performance & Core Web Vitals', score: Math.round(averageHealthScore * 0.8) },
+          { title: 'Internal Linking & Site Architecture', score: Math.round(averageHealthScore * 0.85) },
+          { title: 'Visual UX & Accessibility', score: Math.round(averageHealthScore * 0.75) },
+          { title: 'Authority & Backlinks', score: Math.round(averageHealthScore * 0.7) }
+        ]
+      };
+      
+      return {
+        success: true,
+        data: dashboardData
+      };
+    } catch (error) {
+      console.error('Error getting dashboard data:', error);
+      return {
+        success: true,
+        data: {
+          total_projects: 0,
+          active_projects: 0,
+          average_health_score: 0,
+          page_statuses: [
+            { type: 'healthy', count: 0, label: 'Healthy Pages' },
+            { type: 'broken', count: 0, label: 'Broken Pages' },
+            { type: 'issues', count: 0, label: 'Have Issues' }
+          ],
+          performance_breakdown: [
+            { title: 'Technical SEO', score: 0 },
+            { title: 'Content & On-Page SEO', score: 0 },
+            { title: 'Performance & Core Web Vitals', score: 0 },
+            { title: 'Internal Linking & Site Architecture', score: 0 },
+            { title: 'Visual UX & Accessibility', score: 0 },
+            { title: 'Authority & Backlinks', score: 0 }
+          ]
+        }
+      };
+    }
   }
 
   static async getSiteHealth(siteId: string) {
-    return apiRequest<ApiResponse<any>>(`/health/${siteId}`);
+    return lambdaRequest<ApiResponse<any>>({
+      action: 'getSiteHealth',
+      siteId
+    });
   }
 
-  // Project Results endpoint - gets scraped data from files
-  static async getProjectResults(projectId: string) {
+  // Project Results endpoint - gets scraped data from Lambda
+  static async getProjectResults(projectId: string, userId: string = 'default_user') {
     try {
-      // Get project details and scraped data
-      const [projectResponse, scrapedDataResponse] = await Promise.allSettled([
-        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}`),
-        apiRequest<ApiResponse<any>>(`/gambix/projects/${projectId}/scraped-data`)
-      ]);
-
-      // Extract successful responses
-      const project = projectResponse.status === 'fulfilled' ? projectResponse.value : null;
-      const scrapedData = scrapedDataResponse.status === 'fulfilled' ? scrapedDataResponse.value : null;
-
-      // Check if we at least have the basic project info
-      if (!project || !project.success) {
+      // Get project details from Lambda
+      const projectResponse = await this.getProject(projectId, userId);
+      
+      if (!projectResponse.success) {
         throw new ApiError('Project not found', 404);
       }
 
-      // Combine project and scraped data
+      const project = projectResponse.data;
+
+      // Return project with scraped data
       const projectData = {
-        project: project.data,
-        scrapedData: scrapedData?.data || { has_scraped_data: false }
+        project: project,
+        scrapedData: project.scrape_data || { has_scraped_data: false }
       };
+
+      console.log('Project results fetched from Lambda:', projectData);
 
       return {
         success: true,

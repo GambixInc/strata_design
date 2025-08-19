@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ApiService } from './services/api';
 import './LambdaResults.css';
 
 const LambdaResults: React.FC = () => {
@@ -19,26 +20,31 @@ const LambdaResults: React.FC = () => {
     navigate('/home');
   };
 
-  const handleCreateProject = () => {
-    // Store the scraped data in localStorage for the home page to use
-    const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
-    const newProject = {
-      id: Date.now().toString(),
-      websiteUrl: scrapedData.url,
-      category: 'General',
-      description: scrapedData.description || '',
-      title: scrapedData.title || scrapedData.url,
-      healthScore: Math.floor(Math.random() * 30) + 70,
-      lastChecked: new Date().toISOString(),
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      scrapedData: scrapedData
-    };
-    
-    projects.unshift(newProject);
-    localStorage.setItem('localProjects', JSON.stringify(projects));
-    
-    navigate('/home');
+  const handleCreateProject = async () => {
+    try {
+      console.log('Creating project with scraped data:', scrapedData);
+      
+      const projectData = {
+        websiteUrl: scrapedData.url,
+        category: 'General',
+        description: scrapedData.description || '',
+        scrapedData: scrapedData,
+        userId: 'default_user' // You can replace this with actual user ID from auth
+      };
+      
+      const response = await ApiService.createProject(projectData);
+      
+      if (response.success) {
+        console.log('Project created successfully:', response.data);
+        // Navigate back to home page
+        navigate('/home');
+      } else {
+        throw new Error('Failed to create project');
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      alert('Error creating project. Please try again.');
+    }
   };
 
   if (!scrapedData) {

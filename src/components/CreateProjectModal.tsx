@@ -45,18 +45,18 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     setIsLoading(true);
     try {
-      console.log('Starting lambda call for URL:', formData.websiteUrl);
-      // Call the lambda function to scrape the website
-      const lambdaResponse = await ApiService.callLambdaScraper(formData.websiteUrl);
+      console.log('Creating project with URL:', formData.websiteUrl);
       
-      if (lambdaResponse.success) {
-        console.log('Lambda response successful:', lambdaResponse);
-        console.log('Scraped data to pass:', lambdaResponse.data);
-        
-        // Navigate to the lambda results page with the scraped data
-        navigate('/lambda-results', { 
-          state: { scrapedData: lambdaResponse.data } 
-        });
+      // Call the unified Lambda API to scrape and save project
+      const response = await ApiService.createProject({
+        websiteUrl: formData.websiteUrl,
+        category: formData.category || 'General',
+        description: formData.description || '',
+        userId: 'default_user' // You can replace this with actual user ID from auth
+      });
+      
+      if (response.success) {
+        console.log('Project created successfully:', response.data);
         
         // Reset form and close modal
         setFormData({
@@ -65,8 +65,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           description: ''
         });
         onClose();
+        
+        // Redirect to dashboard to show the new project
+        navigate('/home');
       } else {
-        throw new Error('Failed to scrape website data');
+        throw new Error('Failed to create project');
       }
     } catch (error) {
       console.error('Error creating project:', error);
@@ -76,7 +79,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         type: error?.constructor?.name || 'Unknown type'
       });
       // You might want to show an error message to the user here
-      alert('Error scraping website. Please check the URL and try again.');
+      alert('Error creating project. Please check the URL and try again.');
     } finally {
       setIsLoading(false);
     }
