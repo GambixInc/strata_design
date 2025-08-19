@@ -7,7 +7,6 @@ import { ApiService } from '../services/api';
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (projectData: ProjectData) => void;
 }
 
 interface ProjectData {
@@ -19,8 +18,7 @@ interface ProjectData {
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
-  onClose,
-  onConfirm
+  onClose
 }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<ProjectData>({

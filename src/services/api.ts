@@ -208,7 +208,7 @@ export class ApiService {
     throw new ApiError('User profile management not supported in current API', 501);
   }
 
-  static async updateUserProfile(profileData: any) {
+  static async updateUserProfile(_profileData: any) {
     // Note: User profile management is not supported in the current unified Lambda API
     // This would need to be implemented on the backend if needed
     throw new ApiError('User profile management not supported in current API', 501);
@@ -247,13 +247,11 @@ export class ApiService {
       console.log('Creating project with Lambda:', projectData);
       
       // Call Lambda to scrape and save project
-      const response = await lambdaRequest<any[]>([
-        {
-          url: projectData.websiteUrl,
-          user_id: projectData.userId || 'default_user',
-          retries: 3
-        }
-      ]);
+      const response = await lambdaRequest<any[]>({
+        url: projectData.websiteUrl,
+        user_id: projectData.userId || 'default_user',
+        retries: 3
+      });
       
       console.log('Project created via Lambda:', response);
       
@@ -315,13 +313,13 @@ export class ApiService {
     }
   }
 
-  static async updateProject(projectId: string, projectData: any, userId: string = 'default_user') {
+  static async updateProject(_projectId: string, _projectData: any, _userId: string = 'default_user') {
     // Note: The Lambda API doesn't support updating projects directly
     // This would need to be implemented on the backend if needed
     throw new ApiError('Project updates not supported in current API', 501);
   }
 
-  static async deleteProject(projectId: string, userId: string = 'default_user') {
+  static async deleteProject(_projectId: string, _userId: string = 'default_user') {
     // Note: The Lambda API doesn't support deleting projects directly
     // This would need to be implemented on the backend if needed
     throw new ApiError('Project deletion not supported in current API', 501);

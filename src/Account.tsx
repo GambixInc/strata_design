@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import './App.css';
 import './Account.css';
 import Sidebar from './components/Sidebar';
-import ApiService, { handleApiError } from './services/api';
+import { handleApiError } from './services/api';
 
 import { useAuth } from './hooks/useAuth';
 

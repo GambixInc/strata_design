@@ -159,7 +159,24 @@ const Home: React.FC = () => {
         ]);
         
         if (projectsResponse.success) {
-          setWebsites(projectsResponse.data || []);
+          console.log('Raw Lambda projects response:', projectsResponse.data);
+          
+          // Transform Lambda response to match frontend expectations
+          const transformedProjects = (projectsResponse.data || []).map((project: any) => ({
+            id: project.project_id || project.id || `project_${Date.now()}`,
+            url: project.url || project.domain || 'Unknown URL',
+            icon: 'fas fa-globe',
+            status: project.status || 'Active',
+            healthScore: project.scrape_data?.curl_info?.status_code === 200 ? 85 : 65,
+            recommendations: project.scrape_data?.recommendations?.length || 0,
+            autoOptimize: false,
+            lastUpdated: project.scraped_at ? new Date(project.scraped_at * 1000).toLocaleString() : 'Unknown',
+            // Keep original data for compatibility
+            ...project
+          }));
+          
+          console.log('Transformed projects:', transformedProjects);
+          setWebsites(transformedProjects);
         } else {
           // Backend error - will be handled in catch block
           throw new Error('Failed to load projects');
@@ -291,7 +308,7 @@ const Home: React.FC = () => {
     console.log('Editing:', website.url);
   };
 
-  const handleDeleteProject = async (website: any) => {
+  const handleDeleteProject = async () => {
     try {
       // Show loading state (you could add a loading indicator here)
       console.log('Deleting project...');
@@ -370,12 +387,6 @@ const Home: React.FC = () => {
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleCreateProject = async (projectData: any) => {
-    // This function is no longer used since we redirect to LambdaResults page
-    // Keeping it for compatibility but it won't be called
-    console.log('handleCreateProject called but not used');
   };
 
   const handleRetry = () => {
@@ -555,7 +566,7 @@ const Home: React.FC = () => {
               {!loadingData && (
                 <>
                   {/* Backend Status Notification */}
-                  {websites.length > 0 && websites.some(site => site.id.startsWith('demo-')) && !dataError && (
+                  {websites.length > 0 && websites.some(site => site.id && site.id.startsWith('demo-')) && !dataError && (
                     <div className="backend-status-notification">
                       <i className="fas fa-info-circle"></i>
                       <span>Showing demo data - backend connection unavailable</span>
@@ -652,7 +663,6 @@ const Home: React.FC = () => {
       <CreateProjectModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onConfirm={handleCreateProject}
       />
     </div>
   );

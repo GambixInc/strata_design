@@ -46,10 +46,10 @@ export const CreateProjectForm: React.FC = () => {
       const result = await ApiService.createProject(formData);
       
       if (result.success) {
-        setSuccess(true);
+        console.log('Project created:', result.data);
         setFormData({ websiteUrl: '', category: '', description: '' });
       } else {
-        setError(result.error || 'Failed to create project');
+        setError('Failed to create project');
       }
     } catch (err) {
       setError(handleApiError(err));
