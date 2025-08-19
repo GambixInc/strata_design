@@ -2,12 +2,6 @@
 
 // Environment configuration
 export const config = {
-  // API Configuration
-  api: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '30000'),
-  },
-  
   // Lambda Configuration
   lambda: {
     url: import.meta.env.VITE_CRAWLER_FUNC_URL,
@@ -44,7 +38,8 @@ export const validateEnvironment = (): void => {
   const requiredVars = [
     'VITE_AWS_USER_POOLS_ID',
     'VITE_AWS_USER_POOLS_WEB_CLIENT_ID', 
-    'VITE_AWS_REGION'
+    'VITE_AWS_REGION',
+    'VITE_CRAWLER_FUNC_URL'
   ];
   
   const missingVars = requiredVars.filter(

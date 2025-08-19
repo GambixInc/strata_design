@@ -50,13 +50,17 @@ const Scraper: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await ApiService.scrapeWebsite(url.trim());
+      // Use the unified Lambda API to scrape the website
+      const result = await ApiService.createProject({
+        websiteUrl: url.trim(),
+        userId: 'default_user'
+      });
       
       if (result.success && result.data) {
         setScrapedData(result.data);
-        showAlert(`✅ Successfully scraped! Files saved to: ${result.data.saved_directory}`, 'success');
+        showAlert(`✅ Successfully scraped! Project saved with ID: ${result.data.project_id}`, 'success');
       } else {
-        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
+        showAlert(`❌ Error: Unknown error occurred`, 'error');
       }
     } catch (error) {
       const errorMessage = handleApiError(error);
@@ -75,15 +79,10 @@ const Scraper: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await ApiService.optimizeWebsite(url.trim(), userProfile);
-      
-      if (result.success && result.data) {
-        showAlert(`✅ Successfully optimized for ${userProfile}! Files saved to: ${result.data.optimized_directory}`, 'success');
-        setActiveTab('files');
-        loadFiles();
-      } else {
-        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
-      }
+      // Note: Website optimization is not supported in the current Lambda API
+      showAlert('⚠️ Website optimization is not supported in the current unified Lambda API.', 'info');
+      setActiveTab('files');
+      loadFiles();
     } catch (error) {
       const errorMessage = handleApiError(error);
       showAlert(`❌ Error: ${errorMessage}`, 'error');
@@ -95,13 +94,9 @@ const Scraper: React.FC = () => {
   // Load files from backend
   const loadFiles = async () => {
     try {
-      const result = await ApiService.getFiles();
-      
-      if (result.success && result.data) {
-        setFiles(result.data);
-      } else {
-        showAlert(`❌ Error: ${result.error || 'Unknown error'}`, 'error');
-      }
+      // Note: File listing is not supported in the current Lambda API
+      showAlert('⚠️ File listing is not supported in the current unified Lambda API.', 'info');
+      setFiles(null);
     } catch (error) {
       const errorMessage = handleApiError(error);
       showAlert(`❌ Error: ${errorMessage}`, 'error');

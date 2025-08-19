@@ -163,32 +163,27 @@ export const FileUploadExample: React.FC = () => {
     setProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Simulate progress
+      // Note: File upload functionality not supported in current Lambda API
+      alert('File upload functionality is not supported in the current unified Lambda API.');
+      
+      // Simulate progress for demo
       const interval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 100);
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      setTimeout(() => {
+        clearInterval(interval);
+        setProgress(100);
+        console.log('File upload simulation completed');
+      }, 1000);
 
-      clearInterval(interval);
-      setProgress(100);
-
-      if (response.ok) {
-        console.log('File uploaded successfully');
-      } else {
-        throw new Error('Upload failed');
-      }
     } catch (error) {
       console.error('Upload error:', error);
     } finally {
-      setUploading(false);
-      setProgress(0);
+      setTimeout(() => {
+        setUploading(false);
+        setProgress(0);
+      }, 1500);
     }
   };
 

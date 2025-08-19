@@ -62,32 +62,9 @@ const Account: React.FC = () => {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const response = await ApiService.updateUserProfile({
-        name: `${profile.firstName} ${profile.lastName}`,
-        preferences: {
-          company: profile.company,
-          role: profile.role
-        }
-      });
-      
-      if (response.success) {
-        setIsDirty(false);
-        // Update the profile with the response data
-        const updatedProfile = response.data;
-        if (updatedProfile) {
-          const [firstName, ...lastNameParts] = updatedProfile.name.split(' ');
-          setProfile(prev => ({
-            ...prev,
-            firstName: firstName || '',
-            lastName: lastNameParts.join(' ') || '',
-            email: updatedProfile.email || prev.email,
-            role: updatedProfile.role || prev.role,
-            company: updatedProfile.preferences?.company || prev.company
-          }));
-        }
-      } else {
-        throw new Error(response.error || 'Failed to update profile');
-      }
+      // Note: User profile management is not supported in the current unified Lambda API
+      alert('User profile management is not supported in the current API. Profile changes will not be saved.');
+      setIsDirty(false);
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
@@ -124,22 +101,18 @@ const Account: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        const response = await ApiService.getUserProfile();
-        if (response.success && response.data) {
-          const userData = response.data;
-          const [firstName, ...lastNameParts] = userData.name.split(' ');
-          
-          setProfile({
-            firstName: firstName || '',
-            lastName: lastNameParts.join(' ') || '',
-            email: userData.email || '',
-            role: userData.role || 'user',
-            company: userData.preferences?.company || '',
-            photo: 'https://via.placeholder.com/60'
-          });
-        } else {
-          throw new Error(response.error || 'Failed to load profile');
-        }
+        // Note: User profile management is not supported in the current unified Lambda API
+        // Using default profile data for now
+        const defaultProfile = {
+          firstName: 'User',
+          lastName: 'Account',
+          email: 'user@example.com',
+          role: 'User',
+          company: '',
+          photo: 'https://via.placeholder.com/60'
+        };
+        
+        setProfile(defaultProfile);
       } catch (err) {
         const errorMessage = handleApiError(err);
         setError(errorMessage);

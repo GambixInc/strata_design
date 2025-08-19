@@ -115,21 +115,8 @@ const ProjectResults: React.FC = () => {
     if (!id) return;
     
     try {
-      const response = await fetch(`/api/debug/project/${id}/files`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('Debug info:', data.data);
-        alert(`Debug Info:\n\nPath: ${data.data.scraped_files_path}\nExists: ${data.data.path_exists}\nFiles: ${data.data.files.join(', ')}\n\nCheck console for full details.`);
-      } else {
-        alert(`Debug failed: ${data.error}`);
-      }
+      // Note: Debug functionality not supported in current Lambda API
+      alert('Debug functionality is not supported in the current unified Lambda API.');
     } catch (error) {
       console.error('Debug error:', error);
       alert('Debug request failed. Check console for details.');
@@ -146,22 +133,28 @@ const ProjectResults: React.FC = () => {
     try {
       setLoading(true);
       
-      const response = await fetch(`/api/gambix/projects/${id}/rescraper`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          'Content-Type': 'application/json'
-        }
+      // Get the current project to get the URL
+      const projectResponse = await ApiService.getProject(id, 'default_user');
+      
+      if (!projectResponse.success) {
+        throw new Error('Failed to get project details');
+      }
+      
+      const project = projectResponse.data;
+      const url = project.url;
+      
+      // Re-scrape using the unified Lambda API
+      const rescrapeResponse = await ApiService.createProject({
+        websiteUrl: url,
+        userId: 'default_user'
       });
       
-      const data = await response.json();
-      
-      if (data.success) {
+      if (rescrapeResponse.success) {
         alert('Project re-scraped successfully! Refreshing page...');
         // Reload the page to show the new data
         window.location.reload();
       } else {
-        alert(`Re-scrape failed: ${data.error}`);
+        throw new Error('Failed to re-scrape project');
       }
     } catch (error) {
       console.error('Re-scrape error:', error);

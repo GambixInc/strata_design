@@ -28,7 +28,6 @@ const LambdaResults: React.FC = () => {
         websiteUrl: scrapedData.url,
         category: 'General',
         description: scrapedData.description || '',
-        scrapedData: scrapedData,
         userId: 'default_user' // You can replace this with actual user ID from auth
       };
       

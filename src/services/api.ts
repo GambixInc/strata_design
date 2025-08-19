@@ -201,18 +201,17 @@ export class ApiService {
     });
   }
 
-  // User profile endpoints
+  // User profile endpoints - Not supported in current Lambda API
   static async getUserProfile() {
-    return lambdaRequest<ApiResponse<any>>({
-      action: 'getUserProfile'
-    });
+    // Note: User profile management is not supported in the current unified Lambda API
+    // This would need to be implemented on the backend if needed
+    throw new ApiError('User profile management not supported in current API', 501);
   }
 
   static async updateUserProfile(profileData: any) {
-    return lambdaRequest<ApiResponse<any>>({
-      ...profileData,
-      action: 'updateUserProfile'
-    });
+    // Note: User profile management is not supported in the current unified Lambda API
+    // This would need to be implemented on the backend if needed
+    throw new ApiError('User profile management not supported in current API', 501);
   }
 
   // Project endpoints - Using Lambda for all project operations
